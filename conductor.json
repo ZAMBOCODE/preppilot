@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "setup": "bun install",
+        "setup": "./conductor-setup.sh",
         "run": "bun run dev --port $CONDUCTOR_PORT"
     }
 }
