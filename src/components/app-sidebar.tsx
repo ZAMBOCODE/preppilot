@@ -31,81 +31,81 @@ import {
 const navMain = [
   {
     title: "Übersicht",
-    url: "/?view=dashboard",
     icon: IconChartBar,
+    search: { view: "dashboard" as const },
   },
 ];
 
 const navPlatforms = [
   {
     title: "TikTok",
-    url: "/?tab=tiktok",
     icon: IconBrandTiktok,
+    search: { view: "dashboard" as const, tab: "tiktok" },
   },
   {
     title: "Instagram",
-    url: "/?tab=instagram",
     icon: IconBrandInstagram,
+    search: { view: "dashboard" as const, tab: "instagram" },
   },
   {
     title: "YouTube",
-    url: "/?tab=youtube",
     icon: IconBrandYoutube,
+    search: { view: "dashboard" as const, tab: "youtube" },
   },
   {
     title: "Snapchat",
-    url: "/?tab=snapchat",
     icon: IconBrandSnapchat,
+    search: { view: "dashboard" as const, tab: "snapchat" },
   },
   {
     title: "Shopify",
-    url: "/?tab=shopify",
     icon: IconShoppingCart,
+    search: { view: "dashboard" as const, tab: "shopify" },
   },
 ];
 
 const navFeatures = [
   {
     title: "Kalender",
-    url: "/?view=calendar",
     icon: IconCalendar,
+    search: { view: "calendar" as const },
   },
   {
     title: "Ziele",
-    url: "/?view=goals",
     icon: IconTarget,
+    search: { view: "goals" as const },
   },
   {
     title: "KI-Insights",
-    url: "/?view=insights",
     icon: IconSparkles,
+    search: { view: "insights" as const },
   },
   {
     title: "Wettbewerber",
-    url: "/?view=competitors",
     icon: IconUsers,
+    search: { view: "competitors" as const },
   },
   {
     title: "Benachrichtigungen",
-    url: "/?view=alerts",
     icon: IconBell,
+    search: { view: "alerts" as const },
   },
   {
     title: "Export",
-    url: "/?view=export",
     icon: IconDownload,
+    search: { view: "export" as const },
   },
 ];
 
 const navSecondary = [
   {
     title: "Einstellungen",
-    url: "/settings",
+    url: "#",
     icon: IconSettings,
   },
   {
     title: "Hilfe",
-    url: "/help",
+    url: "#",
     icon: IconHelp,
   },
 ];
