@@ -1,74 +1,116 @@
 import * as React from "react";
 import {
+  IconBrandTiktok,
+  IconBrandInstagram,
+  IconBrandYoutube,
+  IconBrandSnapchat,
+  IconShoppingCart,
+  IconChartBar,
   IconCalendar,
-  IconDashboard,
-  IconHelp,
-  IconSettings,
+  IconTarget,
+  IconSparkles,
   IconUsers,
+  IconBell,
+  IconDownload,
+  IconSettings,
+  IconHelp,
 } from "@tabler/icons-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 import { NavMain } from "~/components/nav-main";
 import { NavSecondary } from "~/components/nav-secondary";
-import { NavUser } from "~/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { useAuth } from "~/contexts/auth";
-import { getUserDisplayName, getUserAvatarUrl } from "~/lib/supabase";
 
 const navMain = [
   {
-    title: "Dashboard",
-    url: "/",
-    icon: IconDashboard,
+    title: "Übersicht",
+    url: "/?view=dashboard",
+    icon: IconChartBar,
+  },
+];
+
+const navPlatforms = [
+  {
+    title: "TikTok",
+    url: "/?tab=tiktok",
+    icon: IconBrandTiktok,
   },
   {
-    title: "Customers",
-    url: "/customers",
+    title: "Instagram",
+    url: "/?tab=instagram",
+    icon: IconBrandInstagram,
+  },
+  {
+    title: "YouTube",
+    url: "/?tab=youtube",
+    icon: IconBrandYoutube,
+  },
+  {
+    title: "Snapchat",
+    url: "/?tab=snapchat",
+    icon: IconBrandSnapchat,
+  },
+  {
+    title: "Shopify",
+    url: "/?tab=shopify",
+    icon: IconShoppingCart,
+  },
+];
+
+const navFeatures = [
+  {
+    title: "Kalender",
+    url: "/?view=calendar",
+    icon: IconCalendar,
+  },
+  {
+    title: "Ziele",
+    url: "/?view=goals",
+    icon: IconTarget,
+  },
+  {
+    title: "KI-Insights",
+    url: "/?view=insights",
+    icon: IconSparkles,
+  },
+  {
+    title: "Wettbewerber",
+    url: "/?view=competitors",
     icon: IconUsers,
   },
   {
-    title: "Meetings",
-    url: "/meetings",
-    icon: IconCalendar,
+    title: "Benachrichtigungen",
+    url: "/?view=alerts",
+    icon: IconBell,
+  },
+  {
+    title: "Export",
+    url: "/?view=export",
+    icon: IconDownload,
   },
 ];
 
 const navSecondary = [
   {
-    title: "Settings",
+    title: "Einstellungen",
     url: "/settings",
     icon: IconSettings,
   },
   {
-    title: "Help",
+    title: "Hilfe",
     url: "/help",
     icon: IconHelp,
   },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate({ to: "/login" });
-  };
-
-  const userData = {
-    name: getUserDisplayName(user),
-    email: user?.email || "",
-    avatar: getUserAvatarUrl(user) || "",
-  };
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -79,7 +121,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link to="/">
-                <span className="text-base font-semibold">PrepPilot</span>
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/logo.png"
+                    alt="zZzlim Logo"
+                    className="h-7 w-auto"
+                  />
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -87,11 +135,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
+        <NavMain items={navPlatforms} label="Plattformen" />
+        <NavMain items={navFeatures} label="Features" />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={userData} onSignOut={handleSignOut} />
-      </SidebarFooter>
     </Sidebar>
   );
 }

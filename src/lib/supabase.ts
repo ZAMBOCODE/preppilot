@@ -120,13 +120,3 @@ export function onAuthStateChange(
   return supabase.auth.onAuthStateChange(callback);
 }
 
-// =============================================================================
-// Helper Types
-// =============================================================================
-
-export type Customer = Database["public"]["Tables"]["customers"]["Row"];
-export type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
-export type CustomerUpdate = Database["public"]["Tables"]["customers"]["Update"];
-export type Meeting = Database["public"]["Tables"]["meetings"]["Row"];
-export type MeetingInsert = Database["public"]["Tables"]["meetings"]["Insert"];
-export type MeetingUpdate = Database["public"]["Tables"]["meetings"]["Update"];

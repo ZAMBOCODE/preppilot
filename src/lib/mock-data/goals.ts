@@ -1,0 +1,78 @@
+import type { Goal } from "~/types/social-media";
+
+export function getGoals(): Goal[] {
+  return [
+    {
+      id: "goal-1",
+      platform: "tiktok",
+      metric: "followers",
+      current: 2_430_000,
+      target: 5_000_000,
+      deadline: "2026-12-31",
+      label: "5M TikTok Follower",
+    },
+    {
+      id: "goal-2",
+      platform: "instagram",
+      metric: "followers",
+      current: 1_820_000,
+      target: 3_000_000,
+      deadline: "2026-12-31",
+      label: "3M Instagram Follower",
+    },
+    {
+      id: "goal-3",
+      platform: "youtube",
+      metric: "subscribers",
+      current: 948_000,
+      target: 1_000_000,
+      deadline: "2026-06-30",
+      label: "1M YouTube Abonnenten",
+    },
+    {
+      id: "goal-4",
+      platform: "all",
+      metric: "engagement",
+      current: 352_000,
+      target: 500_000,
+      deadline: "2026-09-30",
+      label: "500K monatliches Engagement",
+    },
+    {
+      id: "goal-5",
+      platform: "all",
+      metric: "followers",
+      current: 5_198_000,
+      target: 10_000_000,
+      deadline: "2026-12-31",
+      label: "10M Follower gesamt",
+    },
+    {
+      id: "goal-6",
+      platform: "tiktok",
+      metric: "engagementRate",
+      current: 7.8,
+      target: 10.0,
+      deadline: "2026-08-31",
+      label: "10% TikTok Engagement-Rate",
+    },
+    {
+      id: "goal-7",
+      platform: "youtube",
+      metric: "watchTimeHours",
+      current: 84_200,
+      target: 150_000,
+      deadline: "2026-12-31",
+      label: "150K YouTube Watch-Hours",
+    },
+    {
+      id: "goal-8",
+      platform: "instagram",
+      metric: "reach",
+      current: 4_200_000,
+      target: 8_000_000,
+      deadline: "2026-10-31",
+      label: "8M Instagram Reichweite",
+    },
+  ];
+}

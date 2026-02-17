@@ -2,14 +2,14 @@
 
 ## Project Summary
 
-Business Dashboard for managing customers and meetings. Full meeting lifecycle with Claude MCP integration. Learning project for testing AI-assisted development workflow.
+SocialPulse — Social Media Analytics Dashboard for monitoring TikTok, Instagram, YouTube, and Snapchat metrics. Tab-based interface with an Overview + individual platform tabs. Currently uses mock data, designed for future API integration.
 
 ## Tech Stack
 
 - **Framework:** TanStack Start + React 19 + TypeScript
 - **UI:** shadcn/ui + Tailwind CSS v4
-- **Backend:** Supabase (PostgreSQL, Auth, RLS)
-- **Forms:** TanStack Form + Zod
+- **Charts:** Recharts
+- **Backend:** Supabase (kept for future use, currently unused)
 - **Runtime:** Bun
 - **Deployment:** Docker + Coolify
 
@@ -19,57 +19,59 @@ Business Dashboard for managing customers and meetings. Full meeting lifecycle w
 
 ```
 ├── src/
-│   ├── routes/                    # File-based routing
-│   │   ├── __root.tsx             # Root layout
-│   │   ├── index.tsx              # Dashboard
-│   │   ├── login.tsx
-│   │   ├── signup.tsx
-│   │   ├── customers/
-│   │   │   ├── index.tsx          # List
-│   │   │   ├── new.tsx
-│   │   │   └── $customerId/
-│   │   │       ├── index.tsx      # Detail
-│   │   │       └── edit.tsx
-│   │   └── meetings/
-│   │       ├── index.tsx          # List
-│   │       ├── new.tsx
-│   │       └── $meetingId/
-│   │           ├── index.tsx      # Detail (3 tabs)
-│   │           └── edit.tsx
+│   ├── routes/
+│   │   ├── __root.tsx             # Root layout (ThemeProvider)
+│   │   └── index.tsx              # Main dashboard (Sidebar + Tabs)
 │   ├── components/
-│   │   └── ui/                    # shadcn components
-│   └── lib/
-│       ├── supabase.ts            # Supabase client
-│       └── utils.ts
+│   │   ├── ui/                    # shadcn components
+│   │   ├── dashboard/
+│   │   │   ├── metric-card.tsx    # KPI card with change indicator
+│   │   │   ├── time-period-selector.tsx  # 7D/30D/90D toggle
+│   │   │   ├── content-table.tsx  # Video/Reel performance table
+│   │   │   ├── hashtag-list.tsx   # TikTok trending hashtags
+│   │   │   ├── charts/
+│   │   │   │   ├── follower-growth-chart.tsx
+│   │   │   │   ├── engagement-comparison-chart.tsx
+│   │   │   │   ├── platform-line-chart.tsx
+│   │   │   │   └── engagement-pie-chart.tsx
+│   │   │   └── tabs/
+│   │   │       ├── overview-tab.tsx
+│   │   │       ├── tiktok-tab.tsx
+│   │   │       ├── instagram-tab.tsx
+│   │   │       ├── youtube-tab.tsx
+│   │   │       └── snapchat-tab.tsx
+│   │   ├── app-sidebar.tsx        # Sidebar navigation
+│   │   ├── site-header.tsx        # Top header bar
+│   │   ├── nav-main.tsx           # Primary nav items
+│   │   ├── nav-secondary.tsx      # Secondary nav items
+│   │   ├── theme-provider.tsx     # Dark mode provider
+│   │   └── theme-toggle.tsx       # Light/Dark/System toggle
+│   ├── lib/
+│   │   ├── mock-data/             # Mock data (API-ready structure)
+│   │   │   ├── config.ts          # Platform colors & metadata
+│   │   │   ├── helpers.ts         # Time series generator
+│   │   │   ├── overview.ts
+│   │   │   ├── tiktok.ts
+│   │   │   ├── instagram.ts
+│   │   │   ├── youtube.ts
+│   │   │   └── snapchat.ts
+│   │   ├── supabase.ts            # Supabase client (kept for later)
+│   │   └── utils.ts               # cn() helper
+│   └── types/
+│       └── social-media.ts        # All TypeScript interfaces
 ├── types/
-│   └── supabase.ts                # Generated types
-├── mcp/
-│   └── server.ts                  # Claude MCP server
-└── supabase/
-    └── migrations/                # SQL migrations
+│   └── supabase.ts                # Generated Supabase types
 ```
 
 ## Key Patterns
 
-**Supabase Types:** Generate with `bunx supabase gen types typescript --project-id XXX > types/supabase.ts`
+**Mock Data:** All data functions in `src/lib/mock-data/` take a `TimePeriod` parameter and return typed data. Swap internals for real API calls later.
 
-**shadcn/ui:** Use shadcn MCP to search and install components. Example: "search for a date picker component" → install via MCP.
+**Platform Config:** `PLATFORM_CONFIG` in `config.ts` maps each platform to brand colors (TikTok=#00f2ea, Instagram=#E1306C, YouTube=#FF0000, Snapchat=#FFFC00).
 
-**Forms:** TanStack Form with Zod schemas for validation.
+**Charts:** Recharts with `ResponsiveContainer`. Charts wrap in a `div` with explicit height (e.g., `h-[300px]`).
 
-**Auth:** Supabase Auth with RLS. User metadata includes `display_name` and `avatar_url`.
-
-**Markdown:** All note fields support Markdown with interactive checkboxes.
-
-## Database Tables
-
-- **customers:** id, user_id, name, company, email, phone, communication_style, timestamps
-- **meetings:** id, user_id, customer_id, title, scheduled_at, status, preparation, notes, transcript, timestamps
-
-## MCP Tools
-
-1. `get_meetings` – Fetch meetings with full details
-2. `create_meeting_with_prep` – Create meeting + push prep notes
+**shadcn/ui:** Use shadcn MCP to search and install components.
 
 ## Commands
 
@@ -82,5 +84,6 @@ bun run build        # Production build
 ## Notes
 
 - Desktop-first responsive design
-- Dark mode supported
-- Status enum: planned | completed | cancelled
+- Dark mode supported via next-themes
+- No auth required currently (Supabase client kept for future use)
+- Tab structure: Overview | TikTok | Instagram | YouTube | Snapchat
