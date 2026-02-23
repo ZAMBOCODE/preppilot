@@ -1,5 +1,6 @@
 import { MetricCard } from "~/components/dashboard/metric-card";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
+import { CollapsibleSection } from "~/components/dashboard/collapsible-section";
 import { FollowerGrowthChart } from "~/components/dashboard/charts/follower-growth-chart";
 import { EngagementComparisonChart } from "~/components/dashboard/charts/engagement-comparison-chart";
 import { DemographicsChart } from "~/components/dashboard/charts/demographics-chart";
@@ -23,6 +24,7 @@ import {
 import { PLATFORM_CONFIG, PLATFORMS } from "~/lib/mock-data/config";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
 import { cn } from "~/lib/utils";
+import { useIsMobile } from "~/hooks/use-media-query";
 import type { OverviewData, Platform } from "~/types/social-media";
 import type { ViewMode } from "~/components/dashboard/view-mode-toggle";
 
@@ -68,14 +70,15 @@ function buildImpressionsDistribution(data: OverviewData) {
 // ── Dashboard View ─────────────────────────────────────────────────
 
 function DashboardView({ data }: { data: OverviewData }) {
+  const isMobile = useIsMobile();
   const followerDistribution = buildDistributionData(data.followersByPlatform);
   const reachDistribution = buildReachDistribution(data);
 
   return (
     <div className="space-y-8">
-      {/* Row 1: 7 Key Metrics */}
+      {/* Row 1: Key Metrics — mobile shows top 4, desktop all 7 */}
       <AnimatedCard>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-7">
           <MetricCard
             label="Follower gesamt"
             value={data.totalFollowers}
@@ -92,26 +95,32 @@ function DashboardView({ data }: { data: OverviewData }) {
             value={PLATFORM_CONFIG[data.topPerformingPlatform].name}
             accentColor={PLATFORM_CONFIG[data.topPerformingPlatform].color}
           />
-          <MetricCard
-            label="Beiträge gesamt"
-            value={data.totalPosts}
-            change={data.totalPostsChange}
-          />
+          {!isMobile && (
+            <MetricCard
+              label="Beiträge gesamt"
+              value={data.totalPosts}
+              change={data.totalPostsChange}
+            />
+          )}
           <MetricCard
             label="Reichweite gesamt"
             value={data.totalReach}
             change={data.totalReachChange}
           />
-          <MetricCard
-            label="Impressionen gesamt"
-            value={data.totalImpressions}
-            change={data.totalImpressionsChange}
-          />
-          <MetricCard
-            label="Video-Aufrufe"
-            value={data.totalVideoViews}
-            change={data.totalVideoViewsChange}
-          />
+          {!isMobile && (
+            <MetricCard
+              label="Impressionen gesamt"
+              value={data.totalImpressions}
+              change={data.totalImpressionsChange}
+            />
+          )}
+          {!isMobile && (
+            <MetricCard
+              label="Video-Aufrufe"
+              value={data.totalVideoViews}
+              change={data.totalVideoViewsChange}
+            />
+          )}
         </div>
       </AnimatedCard>
 
@@ -136,7 +145,7 @@ function DashboardView({ data }: { data: OverviewData }) {
         </div>
       </AnimatedCard>
 
-      {/* Row 3: Follower Growth + Follower Distribution */}
+      {/* Row 3: Follower Growth + Follower Distribution — stacked on mobile */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3">
@@ -159,45 +168,87 @@ function DashboardView({ data }: { data: OverviewData }) {
         </div>
       </AnimatedCard>
 
-      {/* Row 5: Growth Radar + Reach Distribution */}
+      {/* Row 5: Growth Radar + Reach Distribution — collapsible on mobile */}
       <AnimatedCard delay={0.2}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <GrowthRadarChart data={data.platformRadar} />
-          <PlatformDistributionChart
-            title="Reichweite nach Plattform"
-            data={reachDistribution}
-          />
-        </div>
-      </AnimatedCard>
-
-      {/* Row 6: Posting Heatmap */}
-      <AnimatedCard delay={0.1}>
-        <PostingHeatmap data={data.activeHours} />
-      </AnimatedCard>
-
-      {/* Row 7: Demographics + Countries */}
-      <AnimatedCard delay={0.1}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
+        {isMobile ? (
+          <CollapsibleSection title="Wachstum & Reichweite" defaultOpen>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <GrowthRadarChart data={data.platformRadar} />
+              <PlatformDistributionChart
+                title="Reichweite nach Plattform"
+                data={reachDistribution}
+              />
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <GrowthRadarChart data={data.platformRadar} />
+            <PlatformDistributionChart
+              title="Reichweite nach Plattform"
+              data={reachDistribution}
             />
           </div>
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
-            <CountriesList data={data.audienceDemographics.topCountries} />
-          </div>
-        </div>
+        )}
       </AnimatedCard>
 
-      {/* Row 8: Views by Location */}
+      {/* Row 6: Posting Heatmap — collapsible on mobile, closed by default */}
       <AnimatedCard delay={0.1}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Aufrufe nach Standort</h3>
-          <ViewsByLocation countries={data.viewsByCountry} cities={data.viewsByCityTop} />
-        </div>
+        {isMobile ? (
+          <CollapsibleSection title="Posting-Aktivität" defaultOpen={false}>
+            <PostingHeatmap data={data.activeHours} />
+          </CollapsibleSection>
+        ) : (
+          <PostingHeatmap data={data.activeHours} />
+        )}
+      </AnimatedCard>
+
+      {/* Row 7: Demographics + Countries — collapsible on mobile, closed by default */}
+      <AnimatedCard delay={0.1}>
+        {isMobile ? (
+          <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div>
+                <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
+                <DemographicsChart
+                  ageGroups={data.audienceDemographics.ageGroups}
+                  gender={data.audienceDemographics.gender}
+                />
+              </div>
+              <div>
+                <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
+                <CountriesList data={data.audienceDemographics.topCountries} />
+              </div>
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+              />
+            </div>
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
+              <CountriesList data={data.audienceDemographics.topCountries} />
+            </div>
+          </div>
+        )}
+      </AnimatedCard>
+
+      {/* Row 8: Views by Location — collapsible on mobile, closed by default */}
+      <AnimatedCard delay={0.1}>
+        {isMobile ? (
+          <CollapsibleSection title="Aufrufe nach Standort" defaultOpen={false}>
+            <ViewsByLocation countries={data.viewsByCountry} cities={data.viewsByCityTop} />
+          </CollapsibleSection>
+        ) : (
+          <div>
+            <h3 className="font-heading mb-4 text-lg font-semibold">Aufrufe nach Standort</h3>
+            <ViewsByLocation countries={data.viewsByCountry} cities={data.viewsByCityTop} />
+          </div>
+        )}
       </AnimatedCard>
 
       {/* Row 9: Top Content Cross-Platform */}
@@ -248,6 +299,7 @@ function DashboardView({ data }: { data: OverviewData }) {
 // ── Charts View ────────────────────────────────────────────────────
 
 function ChartsView({ data }: { data: OverviewData }) {
+  const isMobile = useIsMobile();
   const followerDistribution = buildDistributionData(data.followersByPlatform);
   const reachDistribution = buildReachDistribution(data);
   const impressionsDistribution = buildImpressionsDistribution(data);
@@ -259,7 +311,7 @@ function ChartsView({ data }: { data: OverviewData }) {
         <FollowerGrowthChart data={data.followerGrowth} />
       </AnimatedCard>
 
-      {/* 3 columns: Followers / Reach / Impressions distribution */}
+      {/* 3 columns: Followers / Reach / Impressions distribution — stacked on mobile */}
       <AnimatedCard delay={0.05}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <PlatformDistributionChart
@@ -277,7 +329,7 @@ function ChartsView({ data }: { data: OverviewData }) {
         </div>
       </AnimatedCard>
 
-      {/* Engagement Comparison + Engagement Pie side by side */}
+      {/* Engagement Comparison + Engagement Pie — stacked on mobile */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <EngagementComparisonChart data={data.engagementComparison} />
@@ -295,21 +347,39 @@ function ChartsView({ data }: { data: OverviewData }) {
         <PostingHeatmap data={data.activeHours} />
       </AnimatedCard>
 
-      {/* Demographics + Countries side by side */}
+      {/* Demographics + Countries — collapsible on mobile */}
       <AnimatedCard delay={0.1}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
-            />
+        {isMobile ? (
+          <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div>
+                <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
+                <DemographicsChart
+                  ageGroups={data.audienceDemographics.ageGroups}
+                  gender={data.audienceDemographics.gender}
+                />
+              </div>
+              <div>
+                <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
+                <CountriesList data={data.audienceDemographics.topCountries} />
+              </div>
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+              />
+            </div>
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
+              <CountriesList data={data.audienceDemographics.topCountries} />
+            </div>
           </div>
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
-            <CountriesList data={data.audienceDemographics.topCountries} />
-          </div>
-        </div>
+        )}
       </AnimatedCard>
     </div>
   );
@@ -325,6 +395,7 @@ interface ComparisonRow {
 }
 
 function ComparisonView({ data }: { data: OverviewData }) {
+  const isMobile = useIsMobile();
   const platformFollowers = data.followersByPlatform;
 
   const engagementByPlatform: Record<Platform, number> = {} as Record<Platform, number>;
@@ -439,48 +510,50 @@ function ComparisonView({ data }: { data: OverviewData }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[160px]">Metrik</TableHead>
-              {PLATFORMS.map((p) => (
-                <TableHead key={p}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="size-2 rounded-full"
-                      style={{ backgroundColor: PLATFORM_CONFIG[p].color }}
-                    />
-                    {PLATFORM_CONFIG[p].name}
-                  </div>
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row) => {
-              const best = getBestPlatform(row);
-              return (
-                <TableRow key={row.metric}>
-                  <TableCell className="font-medium">{row.metric}</TableCell>
-                  {PLATFORMS.map((p) => {
-                    const isBest = best === p;
-                    return (
-                      <TableCell
-                        key={p}
-                        className={cn("tabular-nums", isBest && "font-bold")}
-                        style={{
-                          backgroundColor: `${PLATFORM_CONFIG[p].color}08`,
-                        }}
-                      >
-                        {row.values[p]}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className={cn("w-[160px]", isMobile && "px-2 py-1.5 text-xs")}>Metrik</TableHead>
+                {PLATFORMS.map((p) => (
+                  <TableHead key={p} className={cn(isMobile && "px-2 py-1.5 text-xs")}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: PLATFORM_CONFIG[p].color }}
+                      />
+                      {PLATFORM_CONFIG[p].name}
+                    </div>
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => {
+                const best = getBestPlatform(row);
+                return (
+                  <TableRow key={row.metric}>
+                    <TableCell className={cn("font-medium", isMobile && "px-2 py-1.5 text-xs")}>{row.metric}</TableCell>
+                    {PLATFORMS.map((p) => {
+                      const isBest = best === p;
+                      return (
+                        <TableCell
+                          key={p}
+                          className={cn("tabular-nums", isBest && "font-bold", isMobile && "px-2 py-1.5 text-xs")}
+                          style={{
+                            backgroundColor: `${PLATFORM_CONFIG[p].color}08`,
+                          }}
+                        >
+                          {row.values[p]}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </AnimatedCard>

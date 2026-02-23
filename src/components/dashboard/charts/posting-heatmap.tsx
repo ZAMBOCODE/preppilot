@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { Badge } from "~/components/ui/badge";
+import { useIsMobile } from "~/hooks/use-media-query";
 
 interface PostingHeatmapProps {
   data: { hour: number; day: string; activity: number }[];
@@ -9,7 +11,57 @@ interface PostingHeatmapProps {
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-export function PostingHeatmap({ data, accentColor = "#851330" }: PostingHeatmapProps) {
+function MobileHeatmap({ data, accentColor = "#851330" }: PostingHeatmapProps) {
+  // Calculate peak hours per day
+  const peaksByDay = DAYS.map((day) => {
+    const dayData = data.filter((d) => d.day === day);
+    if (dayData.length === 0) return { day, peakHour: 0, activity: 0 };
+    const peak = dayData.reduce((best, curr) => (curr.activity > best.activity ? curr : best));
+    return { day, peakHour: peak.hour, activity: peak.activity };
+  });
+
+  const maxActivity = Math.max(...peaksByDay.map((p) => p.activity), 1);
+
+  return (
+    <Card className="border-0 bg-secondary/50 shadow-none">
+      <CardHeader>
+        <CardTitle className="font-heading text-base font-semibold">Beste Posting-Zeiten</CardTitle>
+        <CardDescription>Wann deine Zielgruppe am aktivsten ist</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {peaksByDay.map((peak) => {
+            const intensity = peak.activity / maxActivity;
+            return (
+              <div key={peak.day} className="flex items-center gap-3">
+                <span className="w-8 shrink-0 text-sm font-medium">{peak.day}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${intensity * 100}%`,
+                      backgroundColor: accentColor,
+                      opacity: 0.7,
+                    }}
+                  />
+                </div>
+                <Badge
+                  variant="outline"
+                  className="shrink-0 text-xs tabular-nums"
+                  style={{ borderColor: accentColor, color: accentColor }}
+                >
+                  {peak.peakHour}:00
+                </Badge>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DesktopHeatmap({ data, accentColor = "#851330" }: PostingHeatmapProps) {
   const maxActivity = Math.max(...data.map((d) => d.activity), 1);
 
   const getActivity = (day: string, hour: number) => {
@@ -86,4 +138,9 @@ export function PostingHeatmap({ data, accentColor = "#851330" }: PostingHeatmap
       </CardContent>
     </Card>
   );
+}
+
+export function PostingHeatmap(props: PostingHeatmapProps) {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileHeatmap {...props} /> : <DesktopHeatmap {...props} />;
 }

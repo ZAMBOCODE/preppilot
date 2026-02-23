@@ -8,8 +8,10 @@ import { DemographicsChart } from "~/components/dashboard/charts/demographics-ch
 import { CountriesList } from "~/components/dashboard/charts/countries-list";
 import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
 import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
+import { CollapsibleSection } from "~/components/dashboard/collapsible-section";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { useIsMobile } from "~/hooks/use-media-query";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
 import type { InstagramData } from "~/types/social-media";
@@ -112,6 +114,7 @@ export function InstagramTab({ data }: InstagramTabProps) {
   const [contentType, setContentType] = useState<ContentType>("reels");
   const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const currentItems = contentType === "reels"
     ? data.reelsPerformance
@@ -133,9 +136,76 @@ export function InstagramTab({ data }: InstagramTabProps) {
 
   const contentTypeLabel = contentType === "reels" ? "Reels" : contentType === "stories" ? "Stories" : "Beiträge";
 
+  /* Stories section content (metric cards + table) reused in both mobile/desktop */
+  const storiesContent = (
+    <>
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <MetricCard label="Story-Aufrufe" value={data.storiesViews} change={data.storiesViewsChange} accentColor={ACCENT} />
+        <MetricCard label="Stories gepostet" value={data.storiesPosted} format="number" accentColor={ACCENT} />
+        <MetricCard label="Ø Ausstiegsrate" value={data.avgStoryExitRate} format="percentage" accentColor={ACCENT} />
+        <MetricCard label="Ø Antwortrate" value={data.avgStoryReplyRate} format="percentage" accentColor={ACCENT} />
+      </div>
+      {data.stories.length > 0 && (
+        <div className="mt-6">
+          <ContentTable title="Stories-Performance" columns={STORY_COLUMNS} data={data.stories} />
+        </div>
+      )}
+    </>
+  );
+
+  /* Content Type Performance content */
+  const contentTypePerformanceContent = (
+    <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+      {data.contentTypePerformance.map((item) => (
+        <Card key={item.type} className="border-0 bg-secondary/50 shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <div className="size-2 rounded-full" style={{ backgroundColor: ACCENT }} />
+              {item.type}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-baseline justify-between">
+              <span className="text-muted-foreground text-xs">Anzahl</span>
+              <span className="font-heading text-base font-semibold tabular-nums">
+                {item.count}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-muted-foreground text-xs">Ø Reichweite</span>
+              <span className="font-heading text-base font-semibold tabular-nums">
+                {formatCompactNumber(item.avgReach)}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-muted-foreground text-xs">Ø Engagement</span>
+              <span className="font-heading text-base font-semibold tabular-nums">
+                {formatCompactNumber(item.avgEngagement)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  /* Demographics content */
+  const demographicsContent = (
+    <DemographicsChart
+      ageGroups={data.audienceDemographics.ageGroups}
+      gender={data.audienceDemographics.gender}
+      accentColor={ACCENT}
+    />
+  );
+
+  /* Countries content */
+  const countriesContent = (
+    <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+  );
+
   return (
-    <div className="space-y-8">
-      {/* Top 5 Content */}
+    <div className="space-y-6 md:space-y-8">
+      {/* Top 5 Content — kept as-is, TopVideosGrid handles mobile */}
       <AnimatedCard>
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -174,26 +244,30 @@ export function InstagramTab({ data }: InstagramTabProps) {
         platformName="Instagram"
       />
 
-      {/* Profile Metrics */}
+      {/* Profile Metrics — mobile: 4 cards only, hide "Folge ich" & "E-Mail-Klicks" */}
       <AnimatedCard>
         <div>
           <h3 className="font-heading mb-4 text-lg font-semibold">Profil</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-6">
             <MetricCard label="Follower" value={data.followers} change={data.followersChange} accentColor={ACCENT} />
-            <MetricCard label="Folge ich" value={data.following} format="number" accentColor={ACCENT} />
+            {!isMobile && (
+              <MetricCard label="Folge ich" value={data.following} format="number" accentColor={ACCENT} />
+            )}
             <MetricCard label="Beiträge" value={data.posts} format="number" accentColor={ACCENT} />
             <MetricCard label="Profilbesuche" value={data.profileVisits} change={data.profileVisitsChange} accentColor={ACCENT} />
             <MetricCard label="Website-Klicks" value={data.websiteClicks} change={data.websiteClicksChange} accentColor={ACCENT} />
-            <MetricCard label="E-Mail-Klicks" value={data.emailClicks} format="number" accentColor={ACCENT} />
+            {!isMobile && (
+              <MetricCard label="E-Mail-Klicks" value={data.emailClicks} format="number" accentColor={ACCENT} />
+            )}
           </div>
         </div>
       </AnimatedCard>
 
-      {/* Engagement Metrics */}
+      {/* Engagement Metrics — all 4 kept, fits 2-col on mobile */}
       <AnimatedCard delay={0.05}>
         <div>
           <h3 className="font-heading mb-4 text-lg font-semibold">Engagement</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <MetricCard label="Likes" value={data.likes} change={data.likesChange} accentColor={ACCENT} />
             <MetricCard label="Kommentare" value={data.comments} change={data.commentsChange} accentColor={ACCENT} />
             <MetricCard label="Gespeichert" value={data.saves} change={data.savesChange} accentColor={ACCENT} />
@@ -202,11 +276,11 @@ export function InstagramTab({ data }: InstagramTabProps) {
         </div>
       </AnimatedCard>
 
-      {/* Discovery Metrics */}
+      {/* Discovery Metrics — all 4 kept */}
       <AnimatedCard delay={0.1}>
         <div>
           <h3 className="font-heading mb-4 text-lg font-semibold">Entdecken</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <MetricCard label="Reichweite" value={data.reach} change={data.reachChange} accentColor={ACCENT} />
             <MetricCard label="Impressionen" value={data.impressions} change={data.impressionsChange} accentColor={ACCENT} />
             <MetricCard label="Erreichte Konten" value={data.accountsReached} accentColor={ACCENT} />
@@ -215,26 +289,21 @@ export function InstagramTab({ data }: InstagramTabProps) {
         </div>
       </AnimatedCard>
 
-      {/* Stories Section */}
+      {/* Stories Section — collapsible on mobile */}
       <AnimatedCard delay={0.15}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Stories</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <MetricCard label="Story-Aufrufe" value={data.storiesViews} change={data.storiesViewsChange} accentColor={ACCENT} />
-            <MetricCard label="Stories gepostet" value={data.storiesPosted} format="number" accentColor={ACCENT} />
-            <MetricCard label="Ø Ausstiegsrate" value={data.avgStoryExitRate} format="percentage" accentColor={ACCENT} />
-            <MetricCard label="Ø Antwortrate" value={data.avgStoryReplyRate} format="percentage" accentColor={ACCENT} />
+        {isMobile ? (
+          <CollapsibleSection title="Stories" defaultOpen={false}>
+            {storiesContent}
+          </CollapsibleSection>
+        ) : (
+          <div>
+            <h3 className="font-heading mb-4 text-lg font-semibold">Stories</h3>
+            {storiesContent}
           </div>
-        </div>
+        )}
       </AnimatedCard>
 
-      {data.stories.length > 0 && (
-        <AnimatedCard delay={0.1}>
-          <ContentTable title="Stories-Performance" columns={STORY_COLUMNS} data={data.stories} />
-        </AnimatedCard>
-      )}
-
-      {/* Charts: 2x2 Grid */}
+      {/* Charts: 2x2 on desktop, stacked on mobile */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <PlatformLineChart title="Reichweite über Zeit" data={data.reachOverTime} color={ACCENT} />
@@ -244,70 +313,53 @@ export function InstagramTab({ data }: InstagramTabProps) {
         </div>
       </AnimatedCard>
 
-      {/* Content Type Performance */}
+      {/* Content Type Performance — collapsible on mobile */}
       <AnimatedCard delay={0.1}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Performance nach Inhaltstyp</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {data.contentTypePerformance.map((item) => (
-              <Card key={item.type} className="border-0 bg-secondary/50 shadow-none">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                    <div className="size-2 rounded-full" style={{ backgroundColor: ACCENT }} />
-                    {item.type}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-muted-foreground text-xs">Anzahl</span>
-                    <span className="font-heading text-base font-semibold tabular-nums">
-                      {item.count}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-muted-foreground text-xs">Ø Reichweite</span>
-                    <span className="font-heading text-base font-semibold tabular-nums">
-                      {formatCompactNumber(item.avgReach)}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-muted-foreground text-xs">Ø Engagement</span>
-                    <span className="font-heading text-base font-semibold tabular-nums">
-                      {formatCompactNumber(item.avgEngagement)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {isMobile ? (
+          <CollapsibleSection title="Performance nach Inhaltstyp" defaultOpen={false}>
+            {contentTypePerformanceContent}
+          </CollapsibleSection>
+        ) : (
+          <div>
+            <h3 className="font-heading mb-4 text-lg font-semibold">Performance nach Inhaltstyp</h3>
+            {contentTypePerformanceContent}
           </div>
-        </div>
+        )}
       </AnimatedCard>
 
-      {/* Reels Performance Table */}
+      {/* Reels Performance Table — kept as-is, ContentTable handles mobile */}
       <AnimatedCard delay={0.1}>
         <ContentTable title="Reels-Performance" columns={REEL_COLUMNS} data={data.reelsPerformance} />
       </AnimatedCard>
 
-      {/* Top Posts Table */}
+      {/* Top Posts Table — kept as-is, ContentTable handles mobile */}
       <AnimatedCard delay={0.1}>
         <ContentTable title="Top-Beiträge" columns={POST_COLUMNS} data={data.topPosts} />
       </AnimatedCard>
 
-      {/* Audience Demographics */}
+      {/* Audience Demographics — collapsible on mobile */}
       <AnimatedCard delay={0.1}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
-          <DemographicsChart
-            ageGroups={data.audienceDemographics.ageGroups}
-            gender={data.audienceDemographics.gender}
-            accentColor={ACCENT}
-          />
-        </div>
+        {isMobile ? (
+          <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
+            {demographicsContent}
+          </CollapsibleSection>
+        ) : (
+          <div>
+            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
+            {demographicsContent}
+          </div>
+        )}
       </AnimatedCard>
 
-      {/* Top Countries */}
+      {/* Top Countries — collapsible on mobile */}
       <AnimatedCard delay={0.1}>
-        <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+        {isMobile ? (
+          <CollapsibleSection title="Top-Länder" defaultOpen={false}>
+            {countriesContent}
+          </CollapsibleSection>
+        ) : (
+          countriesContent
+        )}
       </AnimatedCard>
     </div>
   );

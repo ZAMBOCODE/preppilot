@@ -60,7 +60,7 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
       {/* Roadmap Timeline */}
       <div className="relative">
         {/* Vertical line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
+        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-border sm:left-6" />
 
         <div className="flex flex-col gap-0">
           {sorted.map((goal, i) => {
@@ -85,7 +85,7 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
                   delay: i * 0.08,
                   ease: [0.21, 0.47, 0.32, 0.98],
                 }}
-                className="relative flex gap-4 pb-8 last:pb-0"
+                className="relative flex gap-3 pb-6 last:pb-0 sm:gap-4 sm:pb-8"
               >
                 {/* Timeline node */}
                 <div className="relative z-10 flex shrink-0">
@@ -100,7 +100,7 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
                       stiffness: 300,
                       damping: 20,
                     }}
-                    className="flex size-12 items-center justify-center rounded-full border-2"
+                    className="flex size-10 items-center justify-center rounded-full border-2 sm:size-12"
                     style={{
                       borderColor: color,
                       backgroundColor: isComplete
@@ -207,8 +207,8 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
                     </span>
                   </div>
 
-                  {/* Milestones dots */}
-                  <div className="mt-3 flex items-center gap-1">
+                  {/* Milestones dots - hidden on mobile */}
+                  <div className="mt-3 hidden items-center gap-1 sm:flex">
                     {[25, 50, 75, 100].map((milestone) => (
                       <div key={milestone} className="flex items-center gap-1">
                         <div

@@ -4,6 +4,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { Badge } from "~/components/ui/badge";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
+import { useIsMobile } from "~/hooks/use-media-query";
 
 export interface MetricOption {
   key: string;
@@ -27,6 +28,8 @@ export function TopVideosGrid<T extends Record<string, unknown>>({
   onItemClick,
 }: TopVideosGridProps<T>) {
   const [sortMetric, setSortMetric] = useState(metricOptions[0].key);
+  const isMobile = useIsMobile();
+  const displayCount = isMobile ? 3 : 5;
 
   const sorted = useMemo(() => {
     return [...items]
@@ -35,8 +38,8 @@ export function TopVideosGrid<T extends Record<string, unknown>>({
         const bVal = Number(b[sortMetric]) || 0;
         return bVal - aVal;
       })
-      .slice(0, 5);
-  }, [items, sortMetric]);
+      .slice(0, displayCount);
+  }, [items, sortMetric, displayCount]);
 
   const activeOption = metricOptions.find((m) => m.key === sortMetric) ?? metricOptions[0];
 
@@ -50,22 +53,29 @@ export function TopVideosGrid<T extends Record<string, unknown>>({
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         {title && <h3 className="font-heading text-lg font-semibold">{title}</h3>}
-        <ToggleGroup
-          type="single"
-          value={sortMetric}
-          onValueChange={(v) => v && setSortMetric(v)}
-          variant="outline"
-          size="sm"
-        >
-          {metricOptions.map((option) => (
-            <ToggleGroupItem key={option.key} value={option.key} className="text-xs">
-              {option.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <div className={isMobile ? "w-full overflow-x-auto" : undefined}>
+          <ToggleGroup
+            type="single"
+            value={sortMetric}
+            onValueChange={(v) => v && setSortMetric(v)}
+            variant="outline"
+            size="sm"
+            className={isMobile ? "flex-nowrap" : undefined}
+          >
+            {metricOptions.map((option) => (
+              <ToggleGroupItem
+                key={option.key}
+                value={option.key}
+                className={isMobile ? "shrink-0 text-xs" : "text-xs"}
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {sorted.map((item, index) => (
           <motion.div
             key={String(item.id)}
@@ -81,7 +91,9 @@ export function TopVideosGrid<T extends Record<string, unknown>>({
                   <img
                     src={String(item.thumbnailUrl)}
                     alt={String(item.title)}
-                    className="aspect-[4/3] w-full rounded-t-xl object-cover"
+                    className={`w-full rounded-t-xl object-cover ${
+                      isMobile ? "aspect-[16/9]" : "aspect-[4/3]"
+                    }`}
                     loading="lazy"
                   />
                   <Badge

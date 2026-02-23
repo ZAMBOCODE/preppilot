@@ -140,20 +140,22 @@ export function CompetitorBenchmarking({
 
       <CardContent className="p-4">
         {/* Platform toggle */}
-        <div className="flex items-center gap-1 mb-6 rounded-lg bg-background/50 border border-border/50 p-1 w-fit">
-          {PLATFORMS.map((platform) => (
-            <button
-              key={platform}
-              onClick={() => setSelectedPlatform(platform)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                selectedPlatform === platform
-                  ? "bg-foreground text-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {PLATFORM_CONFIG[platform].name}
-            </button>
-          ))}
+        <div className="mb-6 overflow-x-auto -mx-1 px-1">
+          <div className="flex items-center gap-1 rounded-lg bg-background/50 border border-border/50 p-1 w-fit">
+            {PLATFORMS.map((platform) => (
+              <button
+                key={platform}
+                onClick={() => setSelectedPlatform(platform)}
+                className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  selectedPlatform === platform
+                    ? "bg-foreground text-background shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {PLATFORM_CONFIG[platform].name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Bar chart */}
@@ -214,6 +216,7 @@ export function CompetitorBenchmarking({
         </div>
 
         {/* Comparison table */}
+        <div className="overflow-x-auto -mx-4 px-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -282,6 +285,7 @@ export function CompetitorBenchmarking({
             ))}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
     </AnimatedCard>

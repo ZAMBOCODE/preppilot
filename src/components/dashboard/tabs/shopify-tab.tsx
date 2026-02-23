@@ -2,6 +2,7 @@ import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { Card, CardContent } from "~/components/ui/card";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
+import { useIsMobile } from "~/hooks/use-media-query";
 import type { ShopifyData, ComparisonTimeSeriesPoint, CustomerTimeSeriesPoint } from "~/types/social-media";
 import {
   Area,
@@ -48,7 +49,7 @@ function ComparisonLineChart({ data, label }: { data: ComparisonTimeSeriesPoint[
       <span className="text-muted-foreground mb-2 block text-[10px] font-semibold uppercase tracking-widest">
         {label}
       </span>
-      <div className="h-[160px]">
+      <div className="h-[120px] md:h-[160px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
@@ -116,7 +117,7 @@ function ComparisonBarChart({ data, label }: { data: ComparisonTimeSeriesPoint[]
       <span className="text-muted-foreground mb-2 block text-[10px] font-semibold uppercase tracking-widest">
         {label}
       </span>
-      <div className="h-[160px]">
+      <div className="h-[120px] md:h-[160px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
@@ -176,7 +177,7 @@ function CustomerAreaChart({ data }: { data: CustomerTimeSeriesPoint[] }) {
       <span className="text-muted-foreground mb-2 block text-[10px] font-semibold uppercase tracking-widest">
         Kunden über Zeit
       </span>
-      <div className="h-[160px]">
+      <div className="h-[120px] md:h-[160px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
@@ -267,6 +268,8 @@ interface ShopifyTabProps {
 }
 
 export function ShopifyTab({ data }: ShopifyTabProps) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="space-y-6">
       {/* Row 1: Total Sales | Sessions | Returning Customer Rate */}
@@ -274,10 +277,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Total Sales */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Gesamtumsatz</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   €{data.totalSales.toLocaleString("de-DE")}
                 </span>
                 <ChangeIndicator value={data.totalSalesChange} className="text-sm" />
@@ -299,10 +302,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
 
           {/* Online Store Sessions */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Online-Store-Sitzungen</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   {data.sessions.toLocaleString("de-DE")}
                 </span>
                 <ChangeIndicator value={data.sessionsChange} className="text-sm" />
@@ -320,10 +323,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
 
           {/* Returning Customer Rate */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Wiederkehrende Kunden</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   {data.returningCustomerRate}%
                 </span>
                 <ChangeIndicator value={data.returningCustomerRateChange} className="text-sm" />
@@ -339,10 +342,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Conversion Rate */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Conversion-Rate</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   {data.conversionRate}%
                 </span>
                 <ChangeIndicator value={data.conversionRateChange} className="text-sm" />
@@ -385,10 +388,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
 
           {/* Average Order Value */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Ø Bestellwert</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   €{data.avgOrderValue.toFixed(2)}
                 </span>
                 <ChangeIndicator value={data.avgOrderValueChange} className="text-sm" />
@@ -399,10 +402,10 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
 
           {/* Total Orders */}
           <Card className="border-0 bg-secondary/50 shadow-none">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Bestellungen gesamt</span>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-2xl font-bold tabular-nums md:text-3xl">
                   {data.totalOrders.toLocaleString("de-DE")}
                 </span>
                 <ChangeIndicator value={data.totalOrdersChange} className="text-sm" />
@@ -416,9 +419,9 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
       {/* Row 3: Sessions by Device */}
       <AnimatedCard delay={0.1}>
         <Card className="border-0 bg-secondary/50 shadow-none">
-          <CardContent className="p-5">
+          <CardContent className="p-4 md:p-5">
             <span className="text-muted-foreground text-sm font-medium">Sitzungen nach Gerätetyp</span>
-            <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {data.sessionsByDevice.map((device) => (
                 <div key={device.device} className="space-y-2">
                   <div className="flex items-baseline justify-between">
