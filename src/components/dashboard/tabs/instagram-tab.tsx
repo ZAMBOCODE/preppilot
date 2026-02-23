@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
@@ -5,12 +6,69 @@ import { EngagementPieChart } from "~/components/dashboard/charts/engagement-pie
 import { ContentTable } from "~/components/dashboard/content-table";
 import { DemographicsChart } from "~/components/dashboard/charts/demographics-chart";
 import { CountriesList } from "~/components/dashboard/charts/countries-list";
+import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
+import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
 import type { InstagramData } from "~/types/social-media";
 
 const ACCENT = PLATFORM_CONFIG.instagram.color;
+
+type ContentType = "reels" | "stories" | "posts";
+
+const REEL_METRIC_OPTIONS = [
+  { key: "views", label: "Aufrufe" },
+  { key: "likes", label: "Likes" },
+  { key: "comments", label: "Kommentare" },
+  { key: "saves", label: "Gespeichert" },
+  { key: "shares", label: "Shares" },
+];
+
+const STORY_METRIC_OPTIONS = [
+  { key: "impressions", label: "Impressionen" },
+  { key: "reach", label: "Reichweite" },
+  { key: "replies", label: "Antworten" },
+];
+
+const POST_METRIC_OPTIONS = [
+  { key: "likes", label: "Likes" },
+  { key: "comments", label: "Kommentare" },
+  { key: "saves", label: "Gespeichert" },
+  { key: "reach", label: "Reichweite" },
+];
+
+const REEL_DETAIL_METRICS = [
+  { label: "Aufrufe", key: "views" },
+  { label: "Likes", key: "likes" },
+  { label: "Kommentare", key: "comments" },
+  { label: "Gespeichert", key: "saves" },
+  { label: "Shares", key: "shares" },
+  { label: "Reichweite", key: "reach" },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
+
+const STORY_DETAIL_METRICS = [
+  { label: "Impressionen", key: "impressions" },
+  { label: "Reichweite", key: "reach" },
+  { label: "Ausstiege", key: "exits" },
+  { label: "Antworten", key: "replies" },
+  { label: "Weiter getippt", key: "tapsForward" },
+  { label: "Zurück getippt", key: "tapsBack" },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
+
+const POST_DETAIL_METRICS = [
+  { label: "Typ", key: "type", format: "text" as const },
+  { label: "Likes", key: "likes" },
+  { label: "Kommentare", key: "comments" },
+  { label: "Gespeichert", key: "saves" },
+  { label: "Shares", key: "shares" },
+  { label: "Reichweite", key: "reach" },
+  { label: "Impressionen", key: "impressions" },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
 
 const STORY_COLUMNS = [
   { key: "title", label: "Story", format: "text" as const },
@@ -51,8 +109,71 @@ interface InstagramTabProps {
 }
 
 export function InstagramTab({ data }: InstagramTabProps) {
+  const [contentType, setContentType] = useState<ContentType>("reels");
+  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const currentItems = contentType === "reels"
+    ? data.reelsPerformance
+    : contentType === "stories"
+      ? data.stories
+      : data.topPosts;
+
+  const currentMetricOptions = contentType === "reels"
+    ? REEL_METRIC_OPTIONS
+    : contentType === "stories"
+      ? STORY_METRIC_OPTIONS
+      : POST_METRIC_OPTIONS;
+
+  const currentDetailMetrics = contentType === "reels"
+    ? REEL_DETAIL_METRICS
+    : contentType === "stories"
+      ? STORY_DETAIL_METRICS
+      : POST_DETAIL_METRICS;
+
+  const contentTypeLabel = contentType === "reels" ? "Reels" : contentType === "stories" ? "Stories" : "Beiträge";
+
   return (
     <div className="space-y-8">
+      {/* Top 5 Content */}
+      <AnimatedCard>
+        <div>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <h3 className="font-heading text-lg font-semibold">Top 5 {contentTypeLabel}</h3>
+            <ToggleGroup
+              type="single"
+              value={contentType}
+              onValueChange={(v) => v && setContentType(v as ContentType)}
+              variant="outline"
+              size="sm"
+            >
+              <ToggleGroupItem value="reels" className="text-xs">Reels</ToggleGroupItem>
+              <ToggleGroupItem value="stories" className="text-xs">Stories</ToggleGroupItem>
+              <ToggleGroupItem value="posts" className="text-xs">Beiträge</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          <TopVideosGrid
+            title=""
+            items={currentItems}
+            metricOptions={currentMetricOptions}
+            accentColor={ACCENT}
+            onItemClick={(item) => {
+              setSelectedItem(item as unknown as Record<string, unknown>);
+              setSheetOpen(true);
+            }}
+          />
+        </div>
+      </AnimatedCard>
+
+      <VideoDetailSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        video={selectedItem}
+        metrics={currentDetailMetrics}
+        accentColor={ACCENT}
+        platformName="Instagram"
+      />
+
       {/* Profile Metrics */}
       <AnimatedCard>
         <div>

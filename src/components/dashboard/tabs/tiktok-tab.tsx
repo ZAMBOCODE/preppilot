@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
@@ -6,12 +7,33 @@ import { HashtagList } from "~/components/dashboard/hashtag-list";
 import { DemographicsChart } from "~/components/dashboard/charts/demographics-chart";
 import { CountriesList } from "~/components/dashboard/charts/countries-list";
 import { TrafficSourcesChart } from "~/components/dashboard/charts/traffic-sources-chart";
+import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
+import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
 import { formatCompactNumber } from "~/lib/mock-data/helpers";
-import type { TikTokData } from "~/types/social-media";
+import type { TikTokData, TikTokVideo } from "~/types/social-media";
 
 const ACCENT = PLATFORM_CONFIG.tiktok.color;
+
+const TOP_VIDEO_METRICS = [
+  { key: "views", label: "Aufrufe" },
+  { key: "likes", label: "Likes" },
+  { key: "shares", label: "Shares" },
+  { key: "comments", label: "Kommentare" },
+  { key: "saves", label: "Gespeichert" },
+];
+
+const VIDEO_DETAIL_METRICS = [
+  { label: "Aufrufe", key: "views" },
+  { label: "Likes", key: "likes" },
+  { label: "Shares", key: "shares" },
+  { label: "Kommentare", key: "comments" },
+  { label: "Gespeichert", key: "saves" },
+  { label: "Ø Wiedergabe", key: "avgWatchTime", format: "text" as const },
+  { label: "Vollst. %", key: "watchFullPercentage", format: "percentage" as const },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
 
 const VIDEO_COLUMNS = [
   { key: "title", label: "Video", format: "text" as const },
@@ -40,8 +62,34 @@ interface TikTokTabProps {
 }
 
 export function TikTokTab({ data }: TikTokTabProps) {
+  const [selectedVideo, setSelectedVideo] = useState<TikTokVideo | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
   return (
     <div className="space-y-8">
+      {/* Top 5 Videos */}
+      <AnimatedCard>
+        <TopVideosGrid
+          title="Top 5 Videos"
+          items={data.videoPerformance}
+          metricOptions={TOP_VIDEO_METRICS}
+          accentColor={ACCENT}
+          onItemClick={(item) => {
+            setSelectedVideo(item as unknown as TikTokVideo);
+            setSheetOpen(true);
+          }}
+        />
+      </AnimatedCard>
+
+      <VideoDetailSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        video={selectedVideo as unknown as Record<string, unknown>}
+        metrics={VIDEO_DETAIL_METRICS}
+        accentColor={ACCENT}
+        platformName="TikTok"
+      />
+
       {/* Row 1: Key Metrics */}
       <AnimatedCard>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">

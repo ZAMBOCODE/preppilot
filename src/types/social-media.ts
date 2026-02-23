@@ -225,6 +225,7 @@ export interface CalendarPost {
 export interface TikTokVideo {
   id: string;
   title: string;
+  thumbnailUrl: string;
   views: number;
   likes: number;
   shares: number;
@@ -293,6 +294,7 @@ export interface TikTokData {
 export interface InstagramReel {
   id: string;
   title: string;
+  thumbnailUrl: string;
   views: number;
   likes: number;
   comments: number;
@@ -305,6 +307,7 @@ export interface InstagramReel {
 export interface InstagramStory {
   id: string;
   title: string;
+  thumbnailUrl: string;
   impressions: number;
   reach: number;
   exits: number;
@@ -317,6 +320,7 @@ export interface InstagramStory {
 export interface InstagramPost {
   id: string;
   title: string;
+  thumbnailUrl: string;
   type: "image" | "carousel" | "reel" | "video";
   likes: number;
   comments: number;
@@ -384,6 +388,7 @@ export interface InstagramData {
 export interface YouTubeVideo {
   id: string;
   title: string;
+  thumbnailUrl: string;
   views: number;
   likes: number;
   dislikes: number;
@@ -450,6 +455,7 @@ export interface YouTubeData {
 export interface SnapchatStory {
   id: string;
   title: string;
+  thumbnailUrl: string;
   views: number;
   screenshots: number;
   replies: number;
@@ -460,6 +466,7 @@ export interface SnapchatStory {
 export interface SnapchatSpotlight {
   id: string;
   title: string;
+  thumbnailUrl: string;
   views: number;
   favorites: number;
   shares: number;

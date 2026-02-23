@@ -1,13 +1,48 @@
+import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
 import { ContentTable } from "~/components/dashboard/content-table";
 import { DemographicsChart } from "~/components/dashboard/charts/demographics-chart";
 import { CountriesList } from "~/components/dashboard/charts/countries-list";
+import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
+import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
 import type { SnapchatData } from "~/types/social-media";
 
 const ACCENT = PLATFORM_CONFIG.snapchat.color;
+
+type SnapContentType = "stories" | "spotlights";
+
+const STORY_METRIC_OPTIONS = [
+  { key: "views", label: "Aufrufe" },
+  { key: "screenshots", label: "Screenshots" },
+  { key: "replies", label: "Antworten" },
+  { key: "completionRate", label: "Abschluss %", format: "percentage" as const },
+];
+
+const SPOTLIGHT_METRIC_OPTIONS = [
+  { key: "views", label: "Aufrufe" },
+  { key: "favorites", label: "Favoriten" },
+  { key: "shares", label: "Shares" },
+];
+
+const STORY_DETAIL_METRICS = [
+  { label: "Aufrufe", key: "views" },
+  { label: "Screenshots", key: "screenshots" },
+  { label: "Antworten", key: "replies" },
+  { label: "Abschlussrate", key: "completionRate", format: "percentage" as const },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
+
+const SPOTLIGHT_DETAIL_METRICS = [
+  { label: "Aufrufe", key: "views" },
+  { label: "Favoriten", key: "favorites" },
+  { label: "Shares", key: "shares" },
+  { label: "Wiedergabezeit", key: "totalWatchTime", format: "text" as const },
+  { label: "Gepostet", key: "postedAt", format: "date" as const },
+];
 
 const STORY_COLUMNS = [
   { key: "title", label: "Story", format: "text" as const },
@@ -32,8 +67,55 @@ interface SnapchatTabProps {
 }
 
 export function SnapchatTab({ data }: SnapchatTabProps) {
+  const [contentType, setContentType] = useState<SnapContentType>("stories");
+  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const currentItems = contentType === "stories" ? data.stories : data.spotlights;
+  const currentMetricOptions = contentType === "stories" ? STORY_METRIC_OPTIONS : SPOTLIGHT_METRIC_OPTIONS;
+  const currentDetailMetrics = contentType === "stories" ? STORY_DETAIL_METRICS : SPOTLIGHT_DETAIL_METRICS;
+  const contentTypeLabel = contentType === "stories" ? "Stories" : "Spotlights";
+
   return (
     <div className="space-y-8">
+      {/* Top 5 Content */}
+      <AnimatedCard>
+        <div>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <h3 className="font-heading text-lg font-semibold">Top 5 {contentTypeLabel}</h3>
+            <ToggleGroup
+              type="single"
+              value={contentType}
+              onValueChange={(v) => v && setContentType(v as SnapContentType)}
+              variant="outline"
+              size="sm"
+            >
+              <ToggleGroupItem value="stories" className="text-xs">Stories</ToggleGroupItem>
+              <ToggleGroupItem value="spotlights" className="text-xs">Spotlights</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          <TopVideosGrid
+            title=""
+            items={currentItems}
+            metricOptions={currentMetricOptions}
+            accentColor={ACCENT}
+            onItemClick={(item) => {
+              setSelectedItem(item as unknown as Record<string, unknown>);
+              setSheetOpen(true);
+            }}
+          />
+        </div>
+      </AnimatedCard>
+
+      <VideoDetailSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        video={selectedItem}
+        metrics={currentDetailMetrics}
+        accentColor={ACCENT}
+        platformName="Snapchat"
+      />
+
       {/* Profile Metrics */}
       <AnimatedCard>
         <div>

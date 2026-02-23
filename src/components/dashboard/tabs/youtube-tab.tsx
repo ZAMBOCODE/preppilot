@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
@@ -5,11 +6,34 @@ import { ContentTable } from "~/components/dashboard/content-table";
 import { DemographicsChart } from "~/components/dashboard/charts/demographics-chart";
 import { CountriesList } from "~/components/dashboard/charts/countries-list";
 import { TrafficSourcesChart } from "~/components/dashboard/charts/traffic-sources-chart";
+import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
+import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
 import { Card, CardContent } from "~/components/ui/card";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
-import type { YouTubeData } from "~/types/social-media";
+import type { YouTubeData, YouTubeVideo } from "~/types/social-media";
 
 const ACCENT = PLATFORM_CONFIG.youtube.color;
+
+const TOP_VIDEO_METRICS = [
+  { key: "views", label: "Aufrufe" },
+  { key: "likes", label: "Likes" },
+  { key: "comments", label: "Kommentare" },
+  { key: "watchTimeHours", label: "Wiedergabezeit" },
+  { key: "ctr", label: "CTR", format: "percentage" as const },
+];
+
+const VIDEO_DETAIL_METRICS = [
+  { label: "Aufrufe", key: "views" },
+  { label: "Likes", key: "likes" },
+  { label: "Dislikes", key: "dislikes" },
+  { label: "Kommentare", key: "comments" },
+  { label: "Wiedergabezeit (h)", key: "watchTimeHours" },
+  { label: "Ø Dauer", key: "avgViewDuration", format: "text" as const },
+  { label: "Ø Wiedergabe %", key: "avgViewPercentage", format: "percentage" as const },
+  { label: "Impressionen", key: "impressions" },
+  { label: "CTR %", key: "ctr", format: "percentage" as const },
+  { label: "Veröffentlicht", key: "publishedAt", format: "date" as const },
+];
 
 const VIDEO_COLUMNS = [
   { key: "title", label: "Video", format: "text" as const },
@@ -36,8 +60,34 @@ interface YouTubeTabProps {
 }
 
 export function YouTubeTab({ data }: YouTubeTabProps) {
+  const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
   return (
     <div className="space-y-8">
+      {/* Top 5 Videos */}
+      <AnimatedCard>
+        <TopVideosGrid
+          title="Top 5 Videos"
+          items={data.videoPerformance}
+          metricOptions={TOP_VIDEO_METRICS}
+          accentColor={ACCENT}
+          onItemClick={(item) => {
+            setSelectedVideo(item as unknown as YouTubeVideo);
+            setSheetOpen(true);
+          }}
+        />
+      </AnimatedCard>
+
+      <VideoDetailSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        video={selectedVideo as unknown as Record<string, unknown>}
+        metrics={VIDEO_DETAIL_METRICS}
+        accentColor={ACCENT}
+        platformName="YouTube"
+      />
+
       {/* Channel Metrics */}
       <AnimatedCard>
         <div>
