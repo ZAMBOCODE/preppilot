@@ -15,7 +15,7 @@ export function EngagementComparisonChart({ data }: EngagementComparisonChartPro
   }));
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Engagement-Rate</CardTitle>
         <CardDescription>Vergleich über Plattformen</CardDescription>
@@ -43,8 +43,16 @@ export function EngagementComparisonChart({ data }: EngagementComparisonChartPro
                 tickLine={false}
               />
               <Tooltip
+                cursor={false}
                 formatter={(value: number) => [`${value}%`, "Engagement-Rate"]}
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-card)", fontSize: "13px" }}
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-popover)",
+                  color: "var(--color-popover-foreground)",
+                  fontSize: "13px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
               />
               <Bar dataKey="rate" radius={[0, 6, 6, 0]} barSize={24}>
                 {chartData.map((entry) => (

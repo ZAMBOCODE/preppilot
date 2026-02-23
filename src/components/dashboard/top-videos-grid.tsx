@@ -83,7 +83,7 @@ export function TopVideosGrid<T extends Record<string, unknown>>({
             transition={{ duration: 0.2 }}
           >
             <Card
-              className="cursor-pointer border-0 bg-secondary/50 shadow-none transition-colors hover:bg-secondary/80"
+              className="cursor-pointer border-0 bg-secondary/60 shadow-none transition-colors hover:bg-secondary/80"
               onClick={() => onItemClick(item)}
             >
               <CardContent className="p-0">

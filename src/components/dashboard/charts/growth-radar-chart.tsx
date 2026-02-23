@@ -27,7 +27,7 @@ export function GrowthRadarChart({ data }: GrowthRadarChartProps) {
   });
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Plattform-Performance</CardTitle>
         <CardDescription>Normierte Scores (0-100) pro Metrik</CardDescription>
@@ -56,8 +56,10 @@ export function GrowthRadarChart({ data }: GrowthRadarChartProps) {
                 contentStyle={{
                   borderRadius: "8px",
                   border: "1px solid var(--color-border)",
-                  background: "var(--color-card)",
+                  background: "var(--color-popover)",
+                  color: "var(--color-popover-foreground)",
                   fontSize: "13px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 }}
                 formatter={(value: number, name: string) => {
                   const platformName = PLATFORM_CONFIG[name as Platform]?.name ?? name;

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
+import { MetricsBarChart } from "~/components/dashboard/metrics-bar-chart";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
 import { ContentTable } from "~/components/dashboard/content-table";
@@ -119,36 +120,57 @@ export function SnapchatTab({ data }: SnapchatTabProps) {
         platformName="Snapchat"
       />
 
-      {/* Profile Metrics */}
+      {/* Hero Metrics: 3 key numbers */}
       <AnimatedCard>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Profil</h3>
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-5">
-            <MetricCard label="Snap-Punkte" value={data.score} change={data.scoreChange} accentColor={ACCENT} />
-            <MetricCard label="Freunde" value={data.friends} change={data.friendsChange} accentColor={ACCENT} />
-            {!isMobile && (
-              <MetricCard label="Beste Freunde" value={data.bestFriends} format="number" accentColor={ACCENT} />
-            )}
-            <MetricCard label="Streaks" value={data.streaks} change={data.streaksChange} format="number" accentColor={ACCENT} />
-            <MetricCard label="Längster Streak" value={data.longestStreak} format="number" accentColor={ACCENT} />
-          </div>
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          <MetricCard label="Snap-Punkte" value={data.score} change={data.scoreChange} accentColor={ACCENT} />
+          <MetricCard label="Freunde" value={data.friends} change={data.friendsChange} accentColor={ACCENT} />
+          <MetricCard label="Story-Aufrufe" value={data.storyViews} change={data.storyViewsChange} accentColor={ACCENT} />
         </div>
       </AnimatedCard>
 
-      {/* Stories Metrics */}
+      {/* Profil + Stories als Balkendiagramme */}
       <AnimatedCard delay={0.05}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Stories</h3>
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-5">
-            <MetricCard label="Story-Aufrufe" value={data.storyViews} change={data.storyViewsChange} accentColor={ACCENT} />
-            <MetricCard label="Stories gepostet" value={data.storiesPosted} format="number" accentColor={ACCENT} />
-            <MetricCard label="Ø Abschlussrate" value={data.avgCompletionRate} change={data.avgCompletionRateChange} format="percentage" accentColor={ACCENT} />
-            <MetricCard label="Screenshots" value={data.totalScreenshots} accentColor={ACCENT} />
-            {!isMobile && (
-              <MetricCard label="Antworten" value={data.totalReplies} accentColor={ACCENT} />
-            )}
-          </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MetricsBarChart
+            title="Profil"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Beste Freunde", value: data.bestFriends, format: "number" },
+              { label: "Streaks", value: data.streaks, change: data.streaksChange, format: "number" },
+              { label: "Längster Streak", value: data.longestStreak, format: "number" },
+            ]}
+          />
+          <MetricsBarChart
+            title="Stories"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Gepostet", value: data.storiesPosted, format: "number" },
+              { label: "Abschlussrate", value: data.avgCompletionRate, change: data.avgCompletionRateChange, format: "percentage" },
+              { label: "Screenshots", value: data.totalScreenshots },
+              { label: "Antworten", value: data.totalReplies },
+            ]}
+          />
         </div>
+      </AnimatedCard>
+
+      {/* Charts: Story Views + Spotlight Views */}
+      <AnimatedCard delay={0.1}>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <PlatformLineChart title="Story-Aufrufe über Zeit" data={data.storyViewsOverTime} color={ACCENT} />
+          <PlatformLineChart title="Spotlight-Aufrufe über Zeit" data={data.spotlightViewsOverTime} color={ACCENT} />
+        </div>
+      </AnimatedCard>
+
+      {/* Spotlight summary */}
+      <AnimatedCard delay={0.1}>
+        <MetricsBarChart
+          title="Spotlight"
+          accentColor={ACCENT}
+          metrics={[
+            { label: "Aufrufe", value: data.spotlightViews, change: data.spotlightViewsChange },
+          ]}
+        />
       </AnimatedCard>
 
       {/* Stories Table */}
@@ -158,21 +180,6 @@ export function SnapchatTab({ data }: SnapchatTabProps) {
         </AnimatedCard>
       )}
 
-      {/* Story Views Over Time */}
-      <AnimatedCard delay={0.1}>
-        <PlatformLineChart title="Story-Aufrufe über Zeit" data={data.storyViewsOverTime} color={ACCENT} />
-      </AnimatedCard>
-
-      {/* Spotlight Section */}
-      <AnimatedCard delay={0.1}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Spotlight</h3>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <MetricCard label="Spotlight-Aufrufe" value={data.spotlightViews} change={data.spotlightViewsChange} accentColor={ACCENT} />
-          </div>
-        </div>
-      </AnimatedCard>
-
       {/* Spotlight Table */}
       {data.spotlights.length > 0 && (
         <AnimatedCard delay={0.1}>
@@ -180,41 +187,31 @@ export function SnapchatTab({ data }: SnapchatTabProps) {
         </AnimatedCard>
       )}
 
-      {/* Spotlight Views Over Time */}
-      <AnimatedCard delay={0.1}>
-        <PlatformLineChart title="Spotlight-Aufrufe über Zeit" data={data.spotlightViewsOverTime} color={ACCENT} />
-      </AnimatedCard>
-
-      {/* Audience Demographics */}
+      {/* Audience Demographics + Countries */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
-          <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
-              accentColor={ACCENT}
-            />
+          <CollapsibleSection title="Zielgruppe & Länder">
+            <div className="space-y-6">
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+              <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+            </div>
           </CollapsibleSection>
         ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
-              accentColor={ACCENT}
-            />
-          </div>
-        )}
-      </AnimatedCard>
-
-      {/* Top Countries */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Top-Länder" defaultOpen={false}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+            </div>
             <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
-          </CollapsibleSection>
-        ) : (
-          <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+          </div>
         )}
       </AnimatedCard>
     </div>

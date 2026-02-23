@@ -7,8 +7,10 @@ import {
 import type { ReactNode } from "react";
 import appCss from "../app.css?url";
 import { ThemeProvider } from "~/components/theme-provider";
+import { ZzzLoader } from "~/components/zzz-loader";
 
 export const Route = createRootRoute({
+  pendingComponent: ZzzLoader,
   head: () => ({
     meta: [
       { charSet: "utf-8" },

@@ -32,7 +32,7 @@ const INSIGHT_ICON_MAP: Record<
 
 export function InsightsPanel({ insights }: InsightsPanelProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <div className="flex items-center gap-2">
           <CardTitle>KI-Insights</CardTitle>

@@ -132,7 +132,7 @@ export function CompetitorBenchmarking({
 
   return (
     <AnimatedCard>
-      <Card className="gap-0 border-0 bg-secondary/50 py-0 shadow-none">
+      <Card className="gap-0 border-0 bg-secondary/60 py-0 shadow-none">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-lg">Wettbewerber-Vergleich</CardTitle>
           <CardDescription>Benchmark gegen ähnliche Creator</CardDescription>
@@ -193,8 +193,9 @@ export function CompetitorBenchmarking({
                     fontSize: 12,
                     borderRadius: 8,
                     border: "1px solid var(--color-border)",
-                    background: "var(--color-card)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    background: "var(--color-popover)",
+                    color: "var(--color-popover-foreground)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   }}
                 />
                 <Bar dataKey="followers" radius={[4, 4, 0, 0]}>

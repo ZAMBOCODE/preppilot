@@ -7,7 +7,7 @@ interface HashtagListProps {
 
 export function HashtagList({ hashtags }: HashtagListProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Trend-Hashtags</CardTitle>
       </CardHeader>

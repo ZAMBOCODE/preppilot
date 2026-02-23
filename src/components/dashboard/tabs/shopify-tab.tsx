@@ -80,8 +80,10 @@ function ComparisonLineChart({ data, label }: { data: ComparisonTimeSeriesPoint[
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid var(--color-border)",
-                background: "var(--color-card)",
+                background: "var(--color-popover)",
+                color: "var(--color-popover-foreground)",
                 fontSize: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               }}
             />
             <Line
@@ -148,8 +150,10 @@ function ComparisonBarChart({ data, label }: { data: ComparisonTimeSeriesPoint[]
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid var(--color-border)",
-                background: "var(--color-card)",
+                background: "var(--color-popover)",
+                color: "var(--color-popover-foreground)",
                 fontSize: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               }}
             />
             <Bar dataKey="previous" fill={PREVIOUS_COLOR} opacity={0.3} radius={[2, 2, 0, 0]} />
@@ -207,8 +211,10 @@ function CustomerAreaChart({ data }: { data: CustomerTimeSeriesPoint[] }) {
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid var(--color-border)",
-                background: "var(--color-card)",
+                background: "var(--color-popover)",
+                color: "var(--color-popover-foreground)",
                 fontSize: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               }}
             />
             <Area
@@ -276,7 +282,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
       <AnimatedCard>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Total Sales */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Gesamtumsatz</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -301,7 +307,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
           </Card>
 
           {/* Online Store Sessions */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Online-Store-Sitzungen</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -322,7 +328,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
           </Card>
 
           {/* Returning Customer Rate */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Wiederkehrende Kunden</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -341,7 +347,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
       <AnimatedCard delay={0.05}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Conversion Rate */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Conversion-Rate</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -387,7 +393,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
           </Card>
 
           {/* Average Order Value */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Ø Bestellwert</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -401,7 +407,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
           </Card>
 
           {/* Total Orders */}
-          <Card className="border-0 bg-secondary/50 shadow-none">
+          <Card className="border-0 bg-secondary/60 shadow-none">
             <CardContent className="p-4 md:p-5">
               <span className="text-muted-foreground text-sm font-medium">Bestellungen gesamt</span>
               <div className="mt-1 flex items-baseline justify-between">
@@ -418,7 +424,7 @@ export function ShopifyTab({ data }: ShopifyTabProps) {
 
       {/* Row 3: Sessions by Device */}
       <AnimatedCard delay={0.1}>
-        <Card className="border-0 bg-secondary/50 shadow-none">
+        <Card className="border-0 bg-secondary/60 shadow-none">
           <CardContent className="p-4 md:p-5">
             <span className="text-muted-foreground text-sm font-medium">Sitzungen nach Gerätetyp</span>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">

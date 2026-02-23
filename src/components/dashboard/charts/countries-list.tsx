@@ -9,7 +9,7 @@ interface CountriesListProps {
 
 export function CountriesList({ data, accentColor = "#851330" }: CountriesListProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Top Länder</CardTitle>
       </CardHeader>

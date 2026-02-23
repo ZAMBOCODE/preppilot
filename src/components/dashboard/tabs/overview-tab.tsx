@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
+import { MetricsBarChart } from "~/components/dashboard/metrics-bar-chart";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { CollapsibleSection } from "~/components/dashboard/collapsible-section";
 import { FollowerGrowthChart } from "~/components/dashboard/charts/follower-growth-chart";
@@ -31,131 +33,100 @@ import type { ViewMode } from "~/components/dashboard/view-mode-toggle";
 interface OverviewTabProps {
   data: OverviewData;
   viewMode: ViewMode;
+  enabledPlatforms?: Platform[];
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
 
-function buildDistributionData(record: Record<Platform, number>) {
-  return Object.entries(record).map(([platform, count]) => ({
-    name: PLATFORM_CONFIG[platform as Platform].name,
-    value: count,
-    color: PLATFORM_CONFIG[platform as Platform].color,
-  }));
+function buildDistributionData(record: Record<Platform, number>, enabled: Platform[]) {
+  return Object.entries(record)
+    .filter(([platform]) => enabled.includes(platform as Platform))
+    .map(([platform, count]) => ({
+      name: PLATFORM_CONFIG[platform as Platform].name,
+      value: count,
+      color: PLATFORM_CONFIG[platform as Platform].color,
+    }));
 }
 
-function buildReachDistribution(data: OverviewData) {
-  const map: Record<string, number> = {};
-  for (const item of data.reachByPlatform) {
-    map[item.platform] = item.reach;
-  }
-  return Object.entries(map).map(([platform, value]) => ({
-    name: PLATFORM_CONFIG[platform as Platform].name,
-    value,
-    color: PLATFORM_CONFIG[platform as Platform].color,
-  }));
+function buildReachDistribution(data: OverviewData, enabled: Platform[]) {
+  return data.reachByPlatform
+    .filter((item) => enabled.includes(item.platform))
+    .map((item) => ({
+      name: PLATFORM_CONFIG[item.platform].name,
+      value: item.reach,
+      color: PLATFORM_CONFIG[item.platform].color,
+    }));
 }
 
-function buildImpressionsDistribution(data: OverviewData) {
-  const map: Record<string, number> = {};
-  for (const item of data.reachByPlatform) {
-    map[item.platform] = item.impressions;
-  }
-  return Object.entries(map).map(([platform, value]) => ({
-    name: PLATFORM_CONFIG[platform as Platform].name,
-    value,
-    color: PLATFORM_CONFIG[platform as Platform].color,
-  }));
+function buildImpressionsDistribution(data: OverviewData, enabled: Platform[]) {
+  return data.reachByPlatform
+    .filter((item) => enabled.includes(item.platform))
+    .map((item) => ({
+      name: PLATFORM_CONFIG[item.platform].name,
+      value: item.impressions,
+      color: PLATFORM_CONFIG[item.platform].color,
+    }));
 }
 
 // ── Dashboard View ─────────────────────────────────────────────────
 
-function DashboardView({ data }: { data: OverviewData }) {
+function DashboardView({ data, enabled }: { data: OverviewData; enabled: Platform[] }) {
   const isMobile = useIsMobile();
-  const followerDistribution = buildDistributionData(data.followersByPlatform);
-  const reachDistribution = buildReachDistribution(data);
+  const followerDistribution = useMemo(() => buildDistributionData(data.followersByPlatform, enabled), [data, enabled]);
+  const reachDistribution = useMemo(() => buildReachDistribution(data, enabled), [data, enabled]);
+  const filteredGrowth = useMemo(() => data.followerGrowth.filter((s) => enabled.includes(s.platform)), [data, enabled]);
+  const filteredEngagement = useMemo(() => data.engagementComparison.filter((s) => enabled.includes(s.platform)), [data, enabled]);
+  const filteredContent = useMemo(
+    () => data.topContentCrossPlatform.filter((item) => enabled.includes(item.platform)),
+    [data, enabled],
+  );
 
   return (
     <div className="space-y-8">
-      {/* Row 1: Key Metrics — mobile shows top 4, desktop all 7 */}
+      {/* Row 1: Key Metrics — hero cards */}
       <AnimatedCard>
-        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-7">
-          <MetricCard
-            label="Follower gesamt"
-            value={data.totalFollowers}
-            change={data.totalFollowersChange}
-          />
-          <MetricCard
-            label="Engagement-Rate"
-            value={data.totalEngagementRate}
-            change={data.totalEngagementRateChange}
-            format="percentage"
-          />
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+          <MetricCard label="Follower gesamt" value={data.totalFollowers} change={data.totalFollowersChange} />
+          <MetricCard label="Engagement-Rate" value={data.totalEngagementRate} change={data.totalEngagementRateChange} format="percentage" />
           <MetricCard
             label="Top-Plattform"
             value={PLATFORM_CONFIG[data.topPerformingPlatform].name}
             accentColor={PLATFORM_CONFIG[data.topPerformingPlatform].color}
           />
-          {!isMobile && (
-            <MetricCard
-              label="Beiträge gesamt"
-              value={data.totalPosts}
-              change={data.totalPostsChange}
-            />
-          )}
-          <MetricCard
-            label="Reichweite gesamt"
-            value={data.totalReach}
-            change={data.totalReachChange}
-          />
-          {!isMobile && (
-            <MetricCard
-              label="Impressionen gesamt"
-              value={data.totalImpressions}
-              change={data.totalImpressionsChange}
-            />
-          )}
-          {!isMobile && (
-            <MetricCard
-              label="Video-Aufrufe"
-              value={data.totalVideoViews}
-              change={data.totalVideoViewsChange}
-            />
-          )}
+          <MetricCard label="Reichweite gesamt" value={data.totalReach} change={data.totalReachChange} />
         </div>
       </AnimatedCard>
 
-      {/* Row 2: 3 Engagement Metrics */}
+      {/* Row 2: Engagement + Reach als Balkendiagramme */}
       <AnimatedCard delay={0.05}>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-          <MetricCard
-            label="Likes gesamt"
-            value={data.totalLikes}
-            change={data.totalLikesChange}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MetricsBarChart
+            title="Engagement"
+            metrics={[
+              { label: "Likes", value: data.totalLikes, change: data.totalLikesChange },
+              { label: "Kommentare", value: data.totalComments, change: data.totalCommentsChange },
+              { label: "Shares", value: data.totalShares, change: data.totalSharesChange },
+              { label: "Beiträge", value: data.totalPosts, change: data.totalPostsChange },
+            ]}
           />
-          <MetricCard
-            label="Kommentare gesamt"
-            value={data.totalComments}
-            change={data.totalCommentsChange}
-          />
-          <MetricCard
-            label="Shares gesamt"
-            value={data.totalShares}
-            change={data.totalSharesChange}
+          <MetricsBarChart
+            title="Aufrufe & Impressionen"
+            metrics={[
+              { label: "Video-Aufrufe", value: data.totalVideoViews, change: data.totalVideoViewsChange },
+              { label: "Impressionen", value: data.totalImpressions, change: data.totalImpressionsChange },
+            ]}
           />
         </div>
       </AnimatedCard>
 
-      {/* Row 3: Follower Growth + Follower Distribution — stacked on mobile */}
+      {/* Row 3: Follower Growth + Follower Distribution */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <FollowerGrowthChart data={data.followerGrowth} />
+            <FollowerGrowthChart data={filteredGrowth} />
           </div>
           <div className="lg:col-span-2">
-            <PlatformDistributionChart
-              title="Follower nach Plattform"
-              data={followerDistribution}
-            />
+            <PlatformDistributionChart title="Follower nach Plattform" data={followerDistribution} />
           </div>
         </div>
       </AnimatedCard>
@@ -163,35 +134,29 @@ function DashboardView({ data }: { data: OverviewData }) {
       {/* Row 4: Engagement Comparison + Engagement Pie */}
       <AnimatedCard delay={0.15}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <EngagementComparisonChart data={data.engagementComparison} />
+          <EngagementComparisonChart data={filteredEngagement} />
           <EngagementPieChart data={data.engagementByType} />
         </div>
       </AnimatedCard>
 
-      {/* Row 5: Growth Radar + Reach Distribution — collapsible on mobile */}
+      {/* Row 5: Growth Radar + Reach Distribution */}
       <AnimatedCard delay={0.2}>
         {isMobile ? (
           <CollapsibleSection title="Wachstum & Reichweite" defaultOpen>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <GrowthRadarChart data={data.platformRadar} />
-              <PlatformDistributionChart
-                title="Reichweite nach Plattform"
-                data={reachDistribution}
-              />
+              <PlatformDistributionChart title="Reichweite nach Plattform" data={reachDistribution} />
             </div>
           </CollapsibleSection>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <GrowthRadarChart data={data.platformRadar} />
-            <PlatformDistributionChart
-              title="Reichweite nach Plattform"
-              data={reachDistribution}
-            />
+            <PlatformDistributionChart title="Reichweite nach Plattform" data={reachDistribution} />
           </div>
         )}
       </AnimatedCard>
 
-      {/* Row 6: Posting Heatmap — collapsible on mobile, closed by default */}
+      {/* Row 6: Posting Heatmap */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
           <CollapsibleSection title="Posting-Aktivität" defaultOpen={false}>
@@ -202,32 +167,20 @@ function DashboardView({ data }: { data: OverviewData }) {
         )}
       </AnimatedCard>
 
-      {/* Row 7: Demographics + Countries — collapsible on mobile, closed by default */}
+      {/* Row 7: Demographics + Countries */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
           <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div>
-                <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-                <DemographicsChart
-                  ageGroups={data.audienceDemographics.ageGroups}
-                  gender={data.audienceDemographics.gender}
-                />
-              </div>
-              <div>
-                <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
-                <CountriesList data={data.audienceDemographics.topCountries} />
-              </div>
+              <DemographicsChart ageGroups={data.audienceDemographics.ageGroups} gender={data.audienceDemographics.gender} />
+              <CountriesList data={data.audienceDemographics.topCountries} />
             </div>
           </CollapsibleSection>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
               <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-              <DemographicsChart
-                ageGroups={data.audienceDemographics.ageGroups}
-                gender={data.audienceDemographics.gender}
-              />
+              <DemographicsChart ageGroups={data.audienceDemographics.ageGroups} gender={data.audienceDemographics.gender} />
             </div>
             <div>
               <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
@@ -237,7 +190,7 @@ function DashboardView({ data }: { data: OverviewData }) {
         )}
       </AnimatedCard>
 
-      {/* Row 8: Views by Location — collapsible on mobile, closed by default */}
+      {/* Row 8: Views by Location */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
           <CollapsibleSection title="Aufrufe nach Standort" defaultOpen={false}>
@@ -252,127 +205,93 @@ function DashboardView({ data }: { data: OverviewData }) {
       </AnimatedCard>
 
       {/* Row 9: Top Content Cross-Platform */}
-      <AnimatedCard delay={0.1}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Beste Inhalte plattformübergreifend</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data.topContentCrossPlatform.map((item) => (
-              <Card key={item.id} className="border-0 bg-secondary/50 shadow-none">
-                <CardContent className="p-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor: PLATFORM_CONFIG[item.platform].color }}
-                      />
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {PLATFORM_CONFIG[item.platform].name}
+      {filteredContent.length > 0 && (
+        <AnimatedCard delay={0.1}>
+          <div>
+            <h3 className="font-heading mb-4 text-lg font-semibold">Beste Inhalte plattformübergreifend</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredContent.map((item) => (
+                <Card key={item.id} className="border-0 bg-secondary/60 shadow-none">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="size-2 rounded-full" style={{ backgroundColor: PLATFORM_CONFIG[item.platform].color }} />
+                        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+                          {PLATFORM_CONFIG[item.platform].name}
+                        </span>
+                      </div>
+                      <p className="font-heading text-sm font-semibold leading-snug line-clamp-2">{item.title}</p>
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-muted-foreground text-xs">{item.metric}</span>
+                        <span className="font-heading text-base font-semibold tabular-nums">{formatCompactNumber(item.value)}</span>
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        {new Date(item.postedAt).toLocaleDateString("de-DE", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                     </div>
-                    <p className="font-heading text-sm font-semibold leading-snug line-clamp-2">
-                      {item.title}
-                    </p>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-muted-foreground text-xs">{item.metric}</span>
-                      <span className="font-heading text-base font-semibold tabular-nums">
-                        {formatCompactNumber(item.value)}
-                      </span>
-                    </div>
-                    <span className="text-muted-foreground text-xs">
-                      {new Date(item.postedAt).toLocaleDateString("de-DE", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      </AnimatedCard>
+        </AnimatedCard>
+      )}
     </div>
   );
 }
 
 // ── Charts View ────────────────────────────────────────────────────
 
-function ChartsView({ data }: { data: OverviewData }) {
+function ChartsView({ data, enabled }: { data: OverviewData; enabled: Platform[] }) {
   const isMobile = useIsMobile();
-  const followerDistribution = buildDistributionData(data.followersByPlatform);
-  const reachDistribution = buildReachDistribution(data);
-  const impressionsDistribution = buildImpressionsDistribution(data);
+  const followerDistribution = useMemo(() => buildDistributionData(data.followersByPlatform, enabled), [data, enabled]);
+  const reachDistribution = useMemo(() => buildReachDistribution(data, enabled), [data, enabled]);
+  const impressionsDistribution = useMemo(() => buildImpressionsDistribution(data, enabled), [data, enabled]);
+  const filteredGrowth = useMemo(() => data.followerGrowth.filter((s) => enabled.includes(s.platform)), [data, enabled]);
+  const filteredEngagement = useMemo(() => data.engagementComparison.filter((s) => enabled.includes(s.platform)), [data, enabled]);
 
   return (
     <div className="space-y-8">
-      {/* Follower Growth - full width */}
       <AnimatedCard>
-        <FollowerGrowthChart data={data.followerGrowth} />
+        <FollowerGrowthChart data={filteredGrowth} />
       </AnimatedCard>
 
-      {/* 3 columns: Followers / Reach / Impressions distribution — stacked on mobile */}
       <AnimatedCard delay={0.05}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <PlatformDistributionChart
-            title="Follower nach Plattform"
-            data={followerDistribution}
-          />
-          <PlatformDistributionChart
-            title="Reichweite nach Plattform"
-            data={reachDistribution}
-          />
-          <PlatformDistributionChart
-            title="Impressionen nach Plattform"
-            data={impressionsDistribution}
-          />
+          <PlatformDistributionChart title="Follower nach Plattform" data={followerDistribution} />
+          <PlatformDistributionChart title="Reichweite nach Plattform" data={reachDistribution} />
+          <PlatformDistributionChart title="Impressionen nach Plattform" data={impressionsDistribution} />
         </div>
       </AnimatedCard>
 
-      {/* Engagement Comparison + Engagement Pie — stacked on mobile */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <EngagementComparisonChart data={data.engagementComparison} />
+          <EngagementComparisonChart data={filteredEngagement} />
           <EngagementPieChart data={data.engagementByType} />
         </div>
       </AnimatedCard>
 
-      {/* Growth Radar - full width */}
       <AnimatedCard delay={0.1}>
         <GrowthRadarChart data={data.platformRadar} />
       </AnimatedCard>
 
-      {/* Posting Heatmap - full width */}
       <AnimatedCard delay={0.1}>
         <PostingHeatmap data={data.activeHours} />
       </AnimatedCard>
 
-      {/* Demographics + Countries — collapsible on mobile */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
           <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div>
-                <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-                <DemographicsChart
-                  ageGroups={data.audienceDemographics.ageGroups}
-                  gender={data.audienceDemographics.gender}
-                />
-              </div>
-              <div>
-                <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
-                <CountriesList data={data.audienceDemographics.topCountries} />
-              </div>
+              <DemographicsChart ageGroups={data.audienceDemographics.ageGroups} gender={data.audienceDemographics.gender} />
+              <CountriesList data={data.audienceDemographics.topCountries} />
             </div>
           </CollapsibleSection>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
               <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppen-Demografie</h3>
-              <DemographicsChart
-                ageGroups={data.audienceDemographics.ageGroups}
-                gender={data.audienceDemographics.gender}
-              />
+              <DemographicsChart ageGroups={data.audienceDemographics.ageGroups} gender={data.audienceDemographics.gender} />
             </div>
             <div>
               <h3 className="font-heading mb-4 text-lg font-semibold">Top Länder</h3>
@@ -394,7 +313,7 @@ interface ComparisonRow {
   format?: "number" | "percentage" | "text";
 }
 
-function ComparisonView({ data }: { data: OverviewData }) {
+function ComparisonView({ data, enabled }: { data: OverviewData; enabled: Platform[] }) {
   const isMobile = useIsMobile();
   const platformFollowers = data.followersByPlatform;
 
@@ -421,68 +340,40 @@ function ComparisonView({ data }: { data: OverviewData }) {
   const rows: ComparisonRow[] = [
     {
       metric: "Follower",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, formatCompactNumber(platformFollowers[p] ?? 0)]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, platformFollowers[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, formatCompactNumber(platformFollowers[p] ?? 0)])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, platformFollowers[p] ?? 0])) as Record<Platform, number>,
     },
     {
       metric: "Engagement-Rate",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, `${engagementByPlatform[p] ?? 0}%`]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, engagementByPlatform[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, `${engagementByPlatform[p] ?? 0}%`])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, engagementByPlatform[p] ?? 0])) as Record<Platform, number>,
       format: "percentage",
     },
     {
       metric: "Reichweite",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, formatCompactNumber(reachByPlatform[p] ?? 0)]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, reachByPlatform[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, formatCompactNumber(reachByPlatform[p] ?? 0)])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, reachByPlatform[p] ?? 0])) as Record<Platform, number>,
     },
     {
       metric: "Impressionen",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, formatCompactNumber(impressionsByPlatform[p] ?? 0)]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, impressionsByPlatform[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, formatCompactNumber(impressionsByPlatform[p] ?? 0)])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, impressionsByPlatform[p] ?? 0])) as Record<Platform, number>,
     },
     {
       metric: "Beiträge",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, postsByPlatform[p] ?? 0]),
-      ) as Record<Platform, string | number>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, postsByPlatform[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, postsByPlatform[p] ?? 0])) as Record<Platform, string | number>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, postsByPlatform[p] ?? 0])) as Record<Platform, number>,
     },
     {
       metric: "Beste Postzeit",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, bestPostTimeByPlatform[p] ?? "-"]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, bestPostTimeByPlatform[p] ?? "-"])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, 0])) as Record<Platform, number>,
       format: "text",
     },
     {
       metric: "Ø Engagement",
-      values: Object.fromEntries(
-        PLATFORMS.map((p) => [p, `${avgEngagementByPlatform[p] ?? 0}%`]),
-      ) as Record<Platform, string>,
-      rawValues: Object.fromEntries(
-        PLATFORMS.map((p) => [p, avgEngagementByPlatform[p] ?? 0]),
-      ) as Record<Platform, number>,
+      values: Object.fromEntries(enabled.map((p) => [p, `${avgEngagementByPlatform[p] ?? 0}%`])) as Record<Platform, string>,
+      rawValues: Object.fromEntries(enabled.map((p) => [p, avgEngagementByPlatform[p] ?? 0])) as Record<Platform, number>,
       format: "percentage",
     },
   ];
@@ -491,7 +382,7 @@ function ComparisonView({ data }: { data: OverviewData }) {
     if (row.format === "text") return null;
     let best: Platform | null = null;
     let bestVal = -Infinity;
-    for (const p of PLATFORMS) {
+    for (const p of enabled) {
       const val = row.rawValues[p] ?? 0;
       if (val > bestVal) {
         bestVal = val;
@@ -503,55 +394,48 @@ function ComparisonView({ data }: { data: OverviewData }) {
 
   return (
     <AnimatedCard>
-      <Card className="border-0 bg-secondary/50 shadow-none">
+      <Card className="border-0 bg-secondary/60 shadow-none">
         <CardHeader>
-          <CardTitle className="font-heading text-lg font-semibold">
-            Plattform-Vergleich
-          </CardTitle>
+          <CardTitle className="font-heading text-lg font-semibold">Plattform-Vergleich</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className={cn("w-[160px]", isMobile && "px-2 py-1.5 text-xs")}>Metrik</TableHead>
-                {PLATFORMS.map((p) => (
-                  <TableHead key={p} className={cn(isMobile && "px-2 py-1.5 text-xs")}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor: PLATFORM_CONFIG[p].color }}
-                      />
-                      {PLATFORM_CONFIG[p].name}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row) => {
-                const best = getBestPlatform(row);
-                return (
-                  <TableRow key={row.metric}>
-                    <TableCell className={cn("font-medium", isMobile && "px-2 py-1.5 text-xs")}>{row.metric}</TableCell>
-                    {PLATFORMS.map((p) => {
-                      const isBest = best === p;
-                      return (
-                        <TableCell
-                          key={p}
-                          className={cn("tabular-nums", isBest && "font-bold", isMobile && "px-2 py-1.5 text-xs")}
-                          style={{
-                            backgroundColor: `${PLATFORM_CONFIG[p].color}08`,
-                          }}
-                        >
-                          {row.values[p]}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className={cn("w-[160px]", isMobile && "px-2 py-1.5 text-xs")}>Metrik</TableHead>
+                  {enabled.map((p) => (
+                    <TableHead key={p} className={cn(isMobile && "px-2 py-1.5 text-xs")}>
+                      <div className="flex items-center gap-2">
+                        <div className="size-2 rounded-full" style={{ backgroundColor: PLATFORM_CONFIG[p].color }} />
+                        {PLATFORM_CONFIG[p].name}
+                      </div>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row) => {
+                  const best = getBestPlatform(row);
+                  return (
+                    <TableRow key={row.metric}>
+                      <TableCell className={cn("font-medium", isMobile && "px-2 py-1.5 text-xs")}>{row.metric}</TableCell>
+                      {enabled.map((p) => {
+                        const isBest = best === p;
+                        return (
+                          <TableCell
+                            key={p}
+                            className={cn("tabular-nums", isBest && "font-bold", isMobile && "px-2 py-1.5 text-xs")}
+                            style={{ backgroundColor: `${PLATFORM_CONFIG[p].color}08` }}
+                          >
+                            {row.values[p]}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
             </Table>
           </div>
         </CardContent>
@@ -562,14 +446,16 @@ function ComparisonView({ data }: { data: OverviewData }) {
 
 // ── Main Component ─────────────────────────────────────────────────
 
-export function OverviewTab({ data, viewMode }: OverviewTabProps) {
+export function OverviewTab({ data, viewMode, enabledPlatforms }: OverviewTabProps) {
+  const enabled = enabledPlatforms ?? PLATFORMS;
+
   switch (viewMode) {
     case "charts":
-      return <ChartsView data={data} />;
+      return <ChartsView data={data} enabled={enabled} />;
     case "comparison":
-      return <ComparisonView data={data} />;
+      return <ComparisonView data={data} enabled={enabled} />;
     case "dashboard":
     default:
-      return <DashboardView data={data} />;
+      return <DashboardView data={data} enabled={enabled} />;
   }
 }

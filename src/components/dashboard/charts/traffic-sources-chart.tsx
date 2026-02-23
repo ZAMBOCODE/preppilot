@@ -10,7 +10,7 @@ interface TrafficSourcesChartProps {
 
 export function TrafficSourcesChart({ data, accentColor = "#851330" }: TrafficSourcesChartProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Traffic-Quellen</CardTitle>
       </CardHeader>
@@ -21,8 +21,16 @@ export function TrafficSourcesChart({ data, accentColor = "#851330" }: TrafficSo
               <XAxis type="number" tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} className="fill-muted-foreground" />
               <YAxis type="category" dataKey="source" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={110} className="fill-muted-foreground" />
               <Tooltip
+                cursor={false}
                 formatter={(value: number, _name: string, props: { payload: TrafficSource }) => [`${value}% (${formatCompactNumber(props.payload.views)} Aufrufe)`, "Traffic"]}
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-card)", fontSize: "13px" }}
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-popover)",
+                  color: "var(--color-popover-foreground)",
+                  fontSize: "13px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
               />
               <Bar dataKey="percentage" fill={accentColor} fillOpacity={0.75} radius={[0, 4, 4, 0]} barSize={20} />
             </BarChart>

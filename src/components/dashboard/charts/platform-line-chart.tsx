@@ -11,7 +11,7 @@ interface PlatformLineChartProps {
 
 export function PlatformLineChart({ title, data, color }: PlatformLineChartProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">{title}</CardTitle>
       </CardHeader>
@@ -40,7 +40,8 @@ export function PlatformLineChart({ title, data, color }: PlatformLineChartProps
               <Tooltip
                 formatter={(value: number) => [formatCompactNumber(value), title]}
                 labelFormatter={(label: string) => new Date(label).toLocaleDateString("de-DE", { day: "2-digit", month: "long" })}
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-card)", fontSize: "13px" }}
+                cursor={{ stroke: "var(--color-border)", strokeWidth: 1 }}
+                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-popover)", color: "var(--color-popover-foreground)", fontSize: "13px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
               />
               <Area
                 type="monotone"

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
+import { MetricsBarChart } from "~/components/dashboard/metrics-bar-chart";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
 import { ContentTable } from "~/components/dashboard/content-table";
@@ -9,9 +10,8 @@ import { TrafficSourcesChart } from "~/components/dashboard/charts/traffic-sourc
 import { TopVideosGrid } from "~/components/dashboard/top-videos-grid";
 import { VideoDetailSheet } from "~/components/dashboard/video-detail-sheet";
 import { CollapsibleSection } from "~/components/dashboard/collapsible-section";
-import { Card, CardContent } from "~/components/ui/card";
-import { useIsMobile } from "~/hooks/use-media-query";
 import { PLATFORM_CONFIG } from "~/lib/mock-data/config";
+import { useIsMobile } from "~/hooks/use-media-query";
 import type { YouTubeData, YouTubeVideo } from "~/types/social-media";
 
 const ACCENT = PLATFORM_CONFIG.youtube.color;
@@ -67,7 +67,7 @@ export function YouTubeTab({ data }: YouTubeTabProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Top 5 Videos */}
       <AnimatedCard>
         <TopVideosGrid
@@ -91,44 +91,44 @@ export function YouTubeTab({ data }: YouTubeTabProps) {
         platformName="YouTube"
       />
 
-      {/* Channel Metrics — on mobile show only 4 essential cards */}
+      {/* Hero Metrics: 3 key numbers */}
       <AnimatedCard>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Kanal</h3>
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-            <MetricCard label="Abonnenten" value={data.subscribers} change={data.subscribersChange} accentColor={ACCENT} />
-            <MetricCard label="Aufrufe gesamt" value={data.totalViews} change={data.totalViewsChange} accentColor={ACCENT} />
-            <MetricCard label="Wiedergabezeit (h)" value={data.watchTimeHours} change={data.watchTimeChange} accentColor={ACCENT} />
-            <MetricCard label="CTR" value={data.clickThroughRate} change={data.clickThroughRateChange} format="percentage" accentColor={ACCENT} />
-            {!isMobile && (
-              <>
-                <MetricCard label="Likes" value={data.likes} change={data.likesChange} accentColor={ACCENT} />
-                <MetricCard label="Kommentare" value={data.comments} change={data.commentsChange} accentColor={ACCENT} />
-                <MetricCard label="Shares" value={data.shares} change={data.sharesChange} accentColor={ACCENT} />
-                <MetricCard label="Ø Dauer" value={data.averageViewDuration} accentColor={ACCENT} />
-                <MetricCard label="Ø Wiedergabe %" value={data.avgViewPercentage} format="percentage" accentColor={ACCENT} />
-                <MetricCard label="Impressionen" value={data.impressions} change={data.impressionsChange} accentColor={ACCENT} />
-                <MetricCard label="Einzigartige Zuschauer" value={data.uniqueViewers} change={data.uniqueViewersChange} accentColor={ACCENT} />
-              </>
-            )}
-          </div>
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          <MetricCard label="Abonnenten" value={data.subscribers} change={data.subscribersChange} accentColor={ACCENT} />
+          <MetricCard label="Aufrufe gesamt" value={data.totalViews} change={data.totalViewsChange} accentColor={ACCENT} />
+          <MetricCard label="Wiedergabezeit (h)" value={data.watchTimeHours} change={data.watchTimeChange} accentColor={ACCENT} />
         </div>
       </AnimatedCard>
 
-      {/* Revenue Section — all 4 cards always visible */}
+      {/* Engagement + Wiedergabe als Balkendiagramme */}
       <AnimatedCard delay={0.05}>
-        <div>
-          <h3 className="font-heading mb-4 text-lg font-semibold">Einnahmen</h3>
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-            <MetricCard label="Gesch. Einnahmen" value={`$${data.estimatedRevenue.toLocaleString()}`} change={data.estimatedRevenueChange} accentColor={ACCENT} />
-            <MetricCard label="RPM" value={`$${data.rpm.toFixed(2)}`} accentColor={ACCENT} />
-            <MetricCard label="CPM" value={`$${data.cpm.toFixed(2)}`} accentColor={ACCENT} />
-            <MetricCard label="Anzeigen-Impressionen" value={data.adImpressions} accentColor={ACCENT} />
-          </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MetricsBarChart
+            title="Engagement"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Likes", value: data.likes, change: data.likesChange },
+              { label: "Kommentare", value: data.comments, change: data.commentsChange },
+              { label: "Shares", value: data.shares, change: data.sharesChange },
+              { label: "Impressionen", value: data.impressions, change: data.impressionsChange },
+              { label: "CTR", value: data.clickThroughRate, change: data.clickThroughRateChange, format: "percentage" },
+            ]}
+          />
+          <MetricsBarChart
+            title="Einnahmen"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Einnahmen", value: data.estimatedRevenue, change: data.estimatedRevenueChange, format: "currency" },
+              { label: "RPM", value: data.rpm, format: "currency" },
+              { label: "CPM", value: data.cpm, format: "currency" },
+              { label: "Anzeigen-Impr.", value: data.adImpressions },
+              { label: "Ø Wiedergabe %", value: data.avgViewPercentage, format: "percentage" },
+            ]}
+          />
         </div>
       </AnimatedCard>
 
-      {/* Charts: stack on mobile, 2x2 on desktop */}
+      {/* Charts: 2x2 */}
       <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <PlatformLineChart title="Aufrufe über Zeit" data={data.viewsOverTime} color={ACCENT} />
@@ -143,158 +143,81 @@ export function YouTubeTab({ data }: YouTubeTabProps) {
         <ContentTable title="Video-Performance" columns={VIDEO_COLUMNS} data={data.videoPerformance} />
       </AnimatedCard>
 
-      {/* Traffic Sources */}
+      {/* Traffic Sources + Viewer Types + Devices */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
-          <CollapsibleSection title="Traffic-Quellen" defaultOpen={false}>
+          <CollapsibleSection title="Traffic & Zuschauertypen">
+            <div className="space-y-6">
+              <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
+              <MetricsBarChart
+                title="Zuschauertypen"
+                accentColor={ACCENT}
+                metrics={data.viewerTypes.map((vt) => ({
+                  label: vt.type,
+                  value: vt.percentage,
+                  format: "percentage" as const,
+                }))}
+              />
+              <MetricsBarChart
+                title="Geräteverteilung"
+                accentColor={ACCENT}
+                metrics={data.deviceBreakdown.map((d) => ({
+                  label: d.device,
+                  value: d.percentage,
+                  format: "percentage" as const,
+                }))}
+              />
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
-          </CollapsibleSection>
-        ) : (
-          <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
-        )}
-      </AnimatedCard>
-
-      {/* Audience Demographics */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Zielgruppe" defaultOpen={false}>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
+            <MetricsBarChart
+              title="Zuschauertypen"
               accentColor={ACCENT}
+              metrics={data.viewerTypes.map((vt) => ({
+                label: vt.type,
+                value: vt.percentage,
+                format: "percentage" as const,
+              }))}
             />
-          </CollapsibleSection>
-        ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
+            <MetricsBarChart
+              title="Geräteverteilung"
               accentColor={ACCENT}
+              metrics={data.deviceBreakdown.map((d) => ({
+                label: d.device,
+                value: d.percentage,
+                format: "percentage" as const,
+              }))}
             />
           </div>
         )}
       </AnimatedCard>
 
-      {/* Top Countries */}
+      {/* Audience Demographics + Countries */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
-          <CollapsibleSection title="Länder" defaultOpen={false}>
+          <CollapsibleSection title="Zielgruppe & Länder">
+            <div className="space-y-6">
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+              <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+            </div>
             <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
-          </CollapsibleSection>
-        ) : (
-          <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
-        )}
-      </AnimatedCard>
-
-      {/* Viewer Types */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Zuschauertypen" defaultOpen={false}>
-            <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-              {data.viewerTypes.map((vt) => (
-                <Card key={vt.type} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {vt.type}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {vt.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${vt.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CollapsibleSection>
-        ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zuschauertypen</h3>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {data.viewerTypes.map((vt) => (
-                <Card key={vt.type} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {vt.type}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {vt.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${vt.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-      </AnimatedCard>
-
-      {/* Device Breakdown */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Geräteverteilung" defaultOpen={false}>
-            <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-              {data.deviceBreakdown.map((device) => (
-                <Card key={device.device} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {device.device}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {device.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${device.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CollapsibleSection>
-        ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Geräteverteilung</h3>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {data.deviceBreakdown.map((device) => (
-                <Card key={device.device} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {device.device}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {device.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${device.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         )}
       </AnimatedCard>

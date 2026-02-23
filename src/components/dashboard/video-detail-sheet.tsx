@@ -84,7 +84,7 @@ export function VideoDetailSheet<T extends Record<string, unknown>>({
             {metrics.map((metric) => (
               <div
                 key={metric.key}
-                className="rounded-lg bg-secondary/50 p-3"
+                className="rounded-lg bg-secondary/60 p-3"
               >
                 <span className="text-muted-foreground text-xs">{metric.label}</span>
                 <p className="font-heading text-lg font-semibold tabular-nums">

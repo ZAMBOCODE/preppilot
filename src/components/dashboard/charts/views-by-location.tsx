@@ -97,7 +97,7 @@ export function ViewsByLocation({
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
       {/* Map — Germany / DACH focused */}
-      <Card className="border-0 bg-secondary/50 shadow-none xl:col-span-3">
+      <Card className="border-0 bg-secondary/60 shadow-none xl:col-span-3">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
@@ -295,7 +295,7 @@ export function ViewsByLocation({
       {/* Right side — Countries + Cities */}
       <div className="space-y-6 xl:col-span-2">
         {/* Top Countries */}
-        <Card className="border-0 bg-secondary/50 shadow-none">
+        <Card className="border-0 bg-secondary/60 shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="font-heading text-base font-semibold">
               Top Länder
@@ -344,7 +344,7 @@ export function ViewsByLocation({
         </Card>
 
         {/* Top Cities */}
-        <Card className="border-0 bg-secondary/50 shadow-none">
+        <Card className="border-0 bg-secondary/60 shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="font-heading text-base font-semibold">
               Top Städte

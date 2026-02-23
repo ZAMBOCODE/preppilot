@@ -103,7 +103,7 @@ export function ContentCalendar({ posts }: ContentCalendarProps) {
 
   return (
     <AnimatedCard>
-      <Card className="gap-0 border-0 bg-secondary/50 py-0 shadow-none">
+      <Card className="gap-0 border-0 bg-secondary/60 py-0 shadow-none">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-lg">Content-Kalender</CardTitle>
         <p className="text-sm text-muted-foreground">Februar 2026</p>

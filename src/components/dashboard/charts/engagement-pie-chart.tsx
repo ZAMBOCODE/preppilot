@@ -11,7 +11,7 @@ interface EngagementPieChartProps {
 
 export function EngagementPieChart({ data }: EngagementPieChartProps) {
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Engagement-Verteilung</CardTitle>
       </CardHeader>
@@ -35,7 +35,7 @@ export function EngagementPieChart({ data }: EngagementPieChartProps) {
               </Pie>
               <Tooltip
                 formatter={(value: number, name: string) => [formatCompactNumber(value), name]}
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-card)", fontSize: "13px" }}
+                contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-popover)", color: "var(--color-popover-foreground)", fontSize: "13px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
               />
             </PieChart>
           </ResponsiveContainer>

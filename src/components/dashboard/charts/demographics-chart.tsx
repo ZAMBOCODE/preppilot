@@ -12,7 +12,7 @@ export function DemographicsChart({ ageGroups, gender, accentColor = "#851330" }
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Age Distribution */}
-      <Card className="border-0 bg-secondary/50 shadow-none">
+      <Card className="border-0 bg-secondary/60 shadow-none">
         <CardHeader>
           <CardTitle className="font-heading text-base font-semibold">Altersverteilung</CardTitle>
         </CardHeader>
@@ -23,7 +23,7 @@ export function DemographicsChart({ ageGroups, gender, accentColor = "#851330" }
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} className="fill-muted-foreground" />
                 <YAxis tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} className="fill-muted-foreground" width={40} />
-                <Tooltip formatter={(value: number) => [`${value}%`, "Zielgruppe"]} contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-card)", fontSize: "13px" }} />
+                <Tooltip formatter={(value: number) => [`${value}%`, "Zielgruppe"]} contentStyle={{ borderRadius: "8px", border: "1px solid var(--color-border)", background: "var(--color-popover)", color: "var(--color-popover-foreground)", fontSize: "13px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }} />
                 <Bar dataKey="percentage" fill={accentColor} fillOpacity={0.8} radius={[4, 4, 0, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
@@ -32,7 +32,7 @@ export function DemographicsChart({ ageGroups, gender, accentColor = "#851330" }
       </Card>
 
       {/* Gender Split */}
-      <Card className="border-0 bg-secondary/50 shadow-none">
+      <Card className="border-0 bg-secondary/60 shadow-none">
         <CardHeader>
           <CardTitle className="font-heading text-base font-semibold">Geschlechterverteilung</CardTitle>
         </CardHeader>

@@ -38,7 +38,7 @@ export function ContentTable({ title, columns, data }: ContentTableProps) {
   const metricColumns = columns.slice(1, 4);
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">{title}</CardTitle>
       </CardHeader>
@@ -48,7 +48,7 @@ export function ContentTable({ title, columns, data }: ContentTableProps) {
             {data.map((row, i) => (
               <div
                 key={i}
-                className="cursor-pointer rounded-lg bg-secondary/50 p-3 active:opacity-80"
+                className="cursor-pointer rounded-lg bg-secondary/60 p-3 active:opacity-80"
               >
                 {titleColumn && (
                   <p className="line-clamp-2 text-sm font-bold">

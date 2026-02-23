@@ -84,7 +84,7 @@ export function AlertsPanel({ alerts, onAcknowledge }: AlertsPanelProps) {
   });
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <div className="flex items-center gap-2">
           <CardTitle>Benachrichtigungen</CardTitle>

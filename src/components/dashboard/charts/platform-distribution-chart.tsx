@@ -12,7 +12,7 @@ export function PlatformDistributionChart({ title, data, valueFormat = "number" 
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader className="pb-2">
         <CardTitle className="font-heading text-base font-semibold">{title}</CardTitle>
       </CardHeader>
@@ -44,8 +44,10 @@ export function PlatformDistributionChart({ title, data, valueFormat = "number" 
                   contentStyle={{
                     borderRadius: "8px",
                     border: "1px solid var(--color-border)",
-                    background: "var(--color-card)",
+                    background: "var(--color-popover)",
+                    color: "var(--color-popover-foreground)",
                     fontSize: "13px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   }}
                 />
               </PieChart>

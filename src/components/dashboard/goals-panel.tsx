@@ -123,7 +123,7 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
                 <motion.div
                   whileHover={{ y: -2 }}
                   transition={{ duration: 0.2 }}
-                  className="flex-1 rounded-xl border border-border/50 bg-secondary/50 p-4 transition-shadow hover:shadow-md"
+                  className="flex-1 rounded-xl border border-border/50 bg-secondary/60 p-4 transition-shadow hover:shadow-md"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between gap-2">
@@ -241,7 +241,7 @@ export function GoalsPanel({ goals }: GoalsPanelProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/50 bg-secondary/50 px-5 py-3"
+        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/50 bg-secondary/60 px-5 py-3"
       >
         <div className="flex items-center gap-6">
           <div className="flex flex-col">

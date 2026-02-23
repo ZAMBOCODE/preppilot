@@ -23,7 +23,7 @@ function MobileHeatmap({ data, accentColor = "#851330" }: PostingHeatmapProps) {
   const maxActivity = Math.max(...peaksByDay.map((p) => p.activity), 1);
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Beste Posting-Zeiten</CardTitle>
         <CardDescription>Wann deine Zielgruppe am aktivsten ist</CardDescription>
@@ -69,7 +69,7 @@ function DesktopHeatmap({ data, accentColor = "#851330" }: PostingHeatmapProps) 
   };
 
   return (
-    <Card className="border-0 bg-secondary/50 shadow-none">
+    <Card className="border-0 bg-secondary/60 shadow-none">
       <CardHeader>
         <CardTitle className="font-heading text-base font-semibold">Zielgruppen-Aktivität</CardTitle>
         <CardDescription>Beste Zeiten zum Posten basierend auf Zielgruppen-Aktivität</CardDescription>

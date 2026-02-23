@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MetricCard } from "~/components/dashboard/metric-card";
+import { MetricsBarChart } from "~/components/dashboard/metrics-bar-chart";
 import { AnimatedCard } from "~/components/dashboard/animated-card";
 import { PlatformLineChart } from "~/components/dashboard/charts/platform-line-chart";
 import { ContentTable } from "~/components/dashboard/content-table";
@@ -92,39 +93,43 @@ export function TikTokTab({ data }: TikTokTabProps) {
         platformName="TikTok"
       />
 
-      {/* Row 1: Key Metrics */}
+      {/* Hero Metrics: only 3 key numbers */}
       <AnimatedCard>
-        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
           <MetricCard label="Follower" value={data.followers} change={data.followersChange} accentColor={ACCENT} />
-          {!isMobile && (
-            <MetricCard label="Folge ich" value={data.following} format="number" accentColor={ACCENT} />
-          )}
-          {!isMobile && (
-            <MetricCard label="Profilaufrufe" value={data.profileViews} change={data.profileViewsChange} accentColor={ACCENT} />
-          )}
           <MetricCard label="Aufrufe gesamt" value={data.totalViews} change={data.totalViewsChange} accentColor={ACCENT} />
-          <MetricCard label="Likes gesamt" value={data.likes} change={data.likesChange} accentColor={ACCENT} />
-          {!isMobile && (
-            <MetricCard label="Kommentare" value={data.comments} change={data.commentsChange} accentColor={ACCENT} />
-          )}
-          {!isMobile && (
-            <MetricCard label="Shares" value={data.shares} change={data.sharesChange} accentColor={ACCENT} />
-          )}
-          {!isMobile && (
-            <MetricCard label="Gespeichert" value={data.saves} change={data.savesChange} accentColor={ACCENT} />
-          )}
           <MetricCard label="Engagement-Rate" value={data.engagementRate} change={data.engagementRateChange} format="percentage" accentColor={ACCENT} />
-          {!isMobile && (
-            <MetricCard label="Ø Wiedergabezeit" value={data.avgWatchTime} accentColor={ACCENT} />
-          )}
-          {!isMobile && (
-            <MetricCard label="Vollst. angesehen %" value={data.watchFullPercentage} change={data.watchFullPercentageChange} format="percentage" accentColor={ACCENT} />
-          )}
+        </div>
+      </AnimatedCard>
+
+      {/* Engagement + Profil als Balkendiagramme */}
+      <AnimatedCard delay={0.05}>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MetricsBarChart
+            title="Engagement"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Likes", value: data.likes, change: data.likesChange },
+              { label: "Kommentare", value: data.comments, change: data.commentsChange },
+              { label: "Shares", value: data.shares, change: data.sharesChange },
+              { label: "Gespeichert", value: data.saves, change: data.savesChange },
+            ]}
+          />
+          <MetricsBarChart
+            title="Profil & Wiedergabe"
+            accentColor={ACCENT}
+            metrics={[
+              { label: "Profilaufrufe", value: data.profileViews, change: data.profileViewsChange },
+              { label: "Folge ich", value: data.following, format: "number" },
+              { label: "Ø Wiedergabe", value: 0, textValue: data.avgWatchTime, format: "text" },
+              { label: "Vollst. %", value: data.watchFullPercentage, change: data.watchFullPercentageChange, format: "percentage" },
+            ]}
+          />
         </div>
       </AnimatedCard>
 
       {/* Charts: Views Over Time + Followers Over Time */}
-      <AnimatedCard delay={0.05}>
+      <AnimatedCard delay={0.1}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <PlatformLineChart title="Aufrufe über Zeit" data={data.viewsOverTime} color={ACCENT} />
           <PlatformLineChart title="Follower über Zeit" data={data.followersOverTime} color={ACCENT} />
@@ -141,102 +146,76 @@ export function TikTokTab({ data }: TikTokTabProps) {
         <HashtagList hashtags={data.trendingHashtags} />
       </AnimatedCard>
 
-      {/* Audience Demographics */}
+      {/* Traffic Sources + Device Breakdown side by side */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
-          <CollapsibleSection title="Zielgruppe">
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
-              accentColor={ACCENT}
-            />
+          <CollapsibleSection title="Traffic & Geräte">
+            <div className="space-y-6">
+              <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
+              <div className="grid grid-cols-2 gap-3">
+                {data.deviceBreakdown.map((device) => (
+                  <Card key={device.device} className="border-0 bg-secondary/60 shadow-none">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+                          {device.device}
+                        </span>
+                        <span className="font-heading text-2xl font-semibold tabular-nums">
+                          {device.percentage}%
+                        </span>
+                        <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${device.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </CollapsibleSection>
         ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
-            <DemographicsChart
-              ageGroups={data.audienceDemographics.ageGroups}
-              gender={data.audienceDemographics.gender}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
+            <MetricsBarChart
+              title="Geräteverteilung"
               accentColor={ACCENT}
+              metrics={data.deviceBreakdown.map((d) => ({
+                label: d.device,
+                value: d.percentage,
+                format: "percentage" as const,
+              }))}
             />
           </div>
         )}
       </AnimatedCard>
 
-      {/* Top Countries */}
+      {/* Audience Demographics + Countries */}
       <AnimatedCard delay={0.1}>
         {isMobile ? (
-          <CollapsibleSection title="Top-Länder">
+          <CollapsibleSection title="Zielgruppe & Länder">
+            <div className="space-y-6">
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+              <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="font-heading mb-4 text-lg font-semibold">Zielgruppe</h3>
+              <DemographicsChart
+                ageGroups={data.audienceDemographics.ageGroups}
+                gender={data.audienceDemographics.gender}
+                accentColor={ACCENT}
+              />
+            </div>
             <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
-          </CollapsibleSection>
-        ) : (
-          <CountriesList data={data.audienceDemographics.topCountries} accentColor={ACCENT} />
-        )}
-      </AnimatedCard>
-
-      {/* Traffic Sources */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Traffic-Quellen">
-            <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
-          </CollapsibleSection>
-        ) : (
-          <TrafficSourcesChart data={data.trafficSources} accentColor={ACCENT} />
-        )}
-      </AnimatedCard>
-
-      {/* Device Breakdown */}
-      <AnimatedCard delay={0.1}>
-        {isMobile ? (
-          <CollapsibleSection title="Geräteverteilung">
-            <div className="grid grid-cols-2 gap-3">
-              {data.deviceBreakdown.map((device) => (
-                <Card key={device.device} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {device.device}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {device.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${device.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CollapsibleSection>
-        ) : (
-          <div>
-            <h3 className="font-heading mb-4 text-lg font-semibold">Geräteverteilung</h3>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {data.deviceBreakdown.map((device) => (
-                <Card key={device.device} className="border-0 bg-secondary/50 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
-                        {device.device}
-                      </span>
-                      <span className="font-heading text-2xl font-semibold tabular-nums">
-                        {device.percentage}%
-                      </span>
-                      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${device.percentage}%`, backgroundColor: ACCENT, opacity: 0.7 }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         )}
       </AnimatedCard>

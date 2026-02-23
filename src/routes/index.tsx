@@ -1,6 +1,7 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useState, useMemo, useCallback } from "react";
 import { TimePeriodSelector } from "~/components/dashboard/time-period-selector";
+import { PlatformFilter } from "~/components/dashboard/platform-filter";
 import { OverviewTab } from "~/components/dashboard/tabs/overview-tab";
 import { TikTokTab } from "~/components/dashboard/tabs/tiktok-tab";
 import { InstagramTab } from "~/components/dashboard/tabs/instagram-tab";
@@ -26,6 +27,7 @@ import {
   getCalendarPosts,
   getShopifyData,
 } from "~/lib/mock-data";
+import { PLATFORMS } from "~/lib/mock-data/config";
 import type { TimePeriod, Platform } from "~/types/social-media";
 import { ViewModeToggle } from "~/components/dashboard/view-mode-toggle";
 import type { ViewMode } from "~/components/dashboard/view-mode-toggle";
@@ -60,6 +62,7 @@ function DashboardPage() {
 
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("30d");
   const [viewMode, setViewMode] = useState<ViewMode>("dashboard");
+  const [enabledPlatforms, setEnabledPlatforms] = useState<Platform[]>([...PLATFORMS]);
   const [alerts, setAlerts] = useState(() => getAlerts());
 
   const overviewData = useMemo(() => getOverviewData(timePeriod), [timePeriod]);
@@ -109,8 +112,12 @@ function DashboardPage() {
             {/* Dashboard: render active platform tab */}
             {currentView === "dashboard" && activeTab === "overview" && (
               <div className="space-y-6">
-                <ViewModeToggle value={viewMode} onChange={setViewMode} />
-                <OverviewTab data={overviewData} viewMode={viewMode} />
+                <div className="flex flex-wrap items-center gap-4">
+                  <ViewModeToggle value={viewMode} onChange={setViewMode} />
+                  <div className="hidden sm:block h-5 w-px bg-border" />
+                  <PlatformFilter enabled={enabledPlatforms} onChange={setEnabledPlatforms} />
+                </div>
+                <OverviewTab data={overviewData} viewMode={viewMode} enabledPlatforms={enabledPlatforms} />
               </div>
             )}
             {currentView === "dashboard" && activeTab === "tiktok" && (
